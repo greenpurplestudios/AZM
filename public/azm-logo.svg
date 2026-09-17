@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%" fill="none" aria-label="شعار عزم">
+  <defs>
+    <linearGradient id="crest-hl-day" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#4EF3DE" />
+      <stop offset="100%" stopColor="#00D7BD" />
+    </linearGradient>
+    <linearGradient id="crest-sh-day" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#00D7BD" />
+      <stop offset="100%" stopColor="#009A85" />
+    </linearGradient>
+    <linearGradient id="crest-deep-day" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#009A85" />
+      <stop offset="100%" stopColor="#006B5D" />
+    </linearGradient>
+    <linearGradient id="face-sh" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#FFFFFF" />
+      <stop offset="100%" stopColor="#E2E8F0" />
+    </linearGradient>
+    <linearGradient id="beak-hl" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#8E95A5" />
+      <stop offset="50%" stopColor="#3A3D47" />
+      <stop offset="100%" stopColor="#18191E" />
+    </linearGradient>
+    <filter id="eye-glow-day" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Base Black Silhouette / Underlayer (Gives athletic mascot edge) -->
+  <path d="M 210 88 
+           C 255 92 310 115 365 155 
+           C 390 175 410 195 422 216 
+           C 436 242 442 268 436 288 
+           C 426 318 395 305 385 272 
+           C 375 300 358 355 338 415 
+           C 318 382 305 372 292 375 
+           C 275 352 260 342 248 346 
+           C 230 330 205 322 175 320 
+           L 132 385 
+           C 162 335 155 315 130 310 
+           L 72 352 
+           C 105 305 112 285 85 278 
+           L 55 272 
+           C 95 240 125 210 170 172 
+           C 188 135 198 108 210 88 Z" 
+        fill="#08090A" />
+
+  <!-- White Face Plumage (Main head and cheeks) -->
+  <!-- 1. Background shading for face -->
+  <path d="M 315 178 
+           L 380 220 
+           L 374 252 
+           C 355 258 335 285 310 338 
+           L 338 415 
+           C 316 380 304 372 292 375 
+           C 276 350 262 342 250 346 
+           C 236 332 215 324 190 322 
+           L 245 280 
+           C 270 248 295 210 315 178 Z" 
+        fill="url(#face-sh)" />
+
+  <!-- 2. Pure White Highlights on Face & Brow -->
+  <path d="M 315 178 
+           L 378 220 
+           L 370 248 
+           C 352 252 338 270 322 305 
+           C 312 280 290 260 265 252 
+           C 290 225 305 198 315 178 Z" 
+        fill="#FFFFFF" />
+
+  <!-- 3. Front Neck Feather Tufts (White with sharp cuts) -->
+  <path d="M 305 330 
+           C 320 355 330 385 338 415 
+           C 318 382 308 375 296 376 
+           C 310 352 312 338 305 330 Z" 
+        fill="#FFFFFF" />
+  
+  <path d="M 270 315 
+           C 280 335 290 355 294 375 
+           C 278 352 268 344 254 347 
+           C 268 330 270 320 270 315 Z" 
+        fill="#FFFFFF" />
+
+  <!-- Hooked Raptor Beak -->
+  <!-- Dark Beak Base -->
+  <path d="M 374 218 
+           C 395 232 418 252 436 285 
+           C 428 298 418 298 414 278 
+           C 405 258 392 252 372 252 
+           L 374 218 Z" 
+        fill="#141519" />
+
+  <!-- Beak Upper Ridge Sheen -->
+  <path d="M 374 218 
+           C 392 230 412 248 428 276 
+           C 424 274 416 265 408 255 
+           C 395 242 384 232 374 218 Z" 
+        fill="url(#beak-hl)" />
+
+  <!-- Dark Eye Socket / Menacing Mask -->
+  <path d="M 318 182 
+           L 395 224 
+           L 368 252 
+           C 342 246 324 234 308 212 
+           Z" 
+        fill="#090A0C" />
+
+  <!-- The Fierce Raptor Eye -->
+  <g filter="url(#eye-glow-day)">
+    <!-- Outer Eye Glow / Iris -->
+    <path d="M 352 226 
+             C 362 216 376 215 390 225 
+             C 378 234 364 234 352 226 Z" 
+          fill="#00F5D4" />
+    <!-- Menacing Inner Pupil -->
+    <path d="M 364 223 
+             C 372 219 382 220 388 226 
+             C 380 231 372 230 364 223 Z" 
+          fill="#050607" />
+    <!-- White Specular Sparkle -->
+    <circle cx="382" cy="223" r="1.5" fill="#FFFFFF" />
+  </g>
+
+  <!-- Eye Brow Shadow / Overhang -->
+  <path d="M 338 198 
+           L 396 225 
+           L 386 228 
+           C 370 219 354 215 338 198 Z" 
+        fill="#050607" />
+
+  <!-- CREST / HEADBAND / FLOWING STREAMERS -->
+
+  <!-- 1. Top Crown Plume (Sweeping up and over the brow) -->
+  <!-- Top Plume - Highlight facet -->
+  <path d="M 210 88 
+           C 248 94 290 114 340 148 
+           C 370 170 395 192 414 214 
+           L 385 204 
+           C 345 174 305 145 255 125 
+           C 235 116 220 102 210 88 Z" 
+        fill="url(#crest-hl-day)" />
+
+  <!-- Top Plume - Shadow facet -->
+  <path d="M 255 125 
+           C 305 145 345 174 385 204 
+           L 414 214 
+           C 395 212 375 198 350 185 
+           C 300 160 260 145 228 140 
+           L 255 125 Z" 
+        fill="url(#crest-sh-day)" />
+
+  <!-- 2. Central Headband / Forehead Strap -->
+  <!-- Headband - Highlight facet (Upper) -->
+  <path d="M 224 142 
+           C 275 160 325 180 375 205 
+           L 412 216 
+           L 368 226 
+           C 328 206 280 186 235 172 
+           Z" 
+        fill="url(#crest-hl-day)" />
+
+  <!-- Headband - Shadow facet (Lower) -->
+  <path d="M 235 172 
+           C 280 186 328 206 368 226 
+           L 345 234 
+           C 305 218 260 198 215 186 
+           Z" 
+        fill="url(#crest-sh-day)" />
+
+  <!-- 3. Streamer Feather 1 (Top Streamer - Left Flow) -->
+  <!-- Streamer 1 - Upper Highlight -->
+  <path d="M 210 88 
+           C 195 110 175 145 145 195 
+           L 78 274 
+           C 105 254 135 230 170 195 
+           C 195 170 215 130 224 110 Z" 
+        fill="url(#crest-hl-day)" />
+
+  <!-- Streamer 1 - Lower Shadow -->
+  <path d="M 170 195 
+           C 135 230 105 254 78 274 
+           C 105 264 130 246 156 224 
+           C 180 204 198 178 208 155 Z" 
+        fill="url(#crest-sh-day)" />
+
+  <!-- 4. Streamer Feather 2 (Middle Streamer - Left Flow) -->
+  <!-- Streamer 2 - Upper Highlight -->
+  <path d="M 188 175 
+           C 160 212 128 260 68 344 
+           C 95 320 125 292 160 252 
+           C 182 226 198 198 206 182 Z" 
+        fill="url(#crest-hl-day)" />
+
+  <!-- Streamer 2 - Lower Shadow -->
+  <path d="M 160 252 
+           C 125 292 95 320 68 344 
+           C 95 330 120 308 145 280 
+           C 168 254 185 228 194 205 Z" 
+        fill="url(#crest-sh-day)" />
+
+  <!-- 5. Streamer Feather 3 (Bottom Streamer - Lower Left Flow) -->
+  <!-- Streamer 3 - Upper Highlight -->
+  <path d="M 175 235 
+           C 150 270 125 315 88 392 
+           C 112 365 138 335 168 298 
+           C 186 274 198 252 202 238 Z" 
+        fill="url(#crest-hl-day)" />
+
+  <!-- Streamer 3 - Lower Shadow -->
+  <path d="M 168 298 
+           C 138 335 112 365 88 392 
+           C 112 376 135 352 156 324 
+           C 174 298 186 274 190 255 Z" 
+        fill="url(#crest-deep-day)" />
+
+  <!-- Dynamic Geometric Facet Accents (Gives the modern esports edge) -->
+  <path d="M 248 135 L 275 125 L 305 142 L 280 152 Z" fill="#4EF3DE" opacity="0.4" />
+  <path d="M 315 162 L 350 178 L 335 192 L 300 175 Z" fill="#4EF3DE" opacity="0.3" />
+</svg>

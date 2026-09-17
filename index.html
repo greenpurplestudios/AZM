@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>عزم - المساعد اليومي للياقة والعادات</title>
+    <meta name="description" content="المساعد اليومي للياقة والعادات - تطبيق PWA دون إنترنت لتتبع تمارين المقاومة والأرقام القياسية والارتواء بالذكاء الاصطناعي." />
+    <meta property="og:title" content="عزم - المساعد اليومي للياقة والعادات" />
+    <meta property="og:description" content="المساعد اليومي للياقة والعادات - تطبيق PWA دون إنترنت لتتبع تمارين المقاومة والأرقام القياسية والارتواء بالذكاء الاصطناعي." />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#070B0A" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="عزم" />
+    <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="preload" as="image" href="/bg-night.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root, html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+      }
+      #root {
+        min-height: 100vh;
+      }
+    </style>
+  </head>
+  <body class="antialiased min-h-screen overflow-x-hidden">
+    <div id="root">
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans', 'Readex Pro', sans-serif; direction: rtl; text-align: center; padding: 20px;">
+        <div style="width: 64px; height: 64px; margin-bottom: 14px;">
+          <img src="/azm-logo-night.svg" alt="عزم" width="64" height="64" style="width: 100%; height: 100%; object-fit: contain;" />
+        </div>
+        <div style="font-size: 18px; font-weight: 800; margin-bottom: 4px;">عَــزْم</div>
+        <div style="font-size: 13px; opacity: 0.6;">جاري تحميل التطبيق...</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

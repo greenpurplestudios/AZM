@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  /* DAY MODE — TEAL / MINT */
+  --bg-primary: #F7FAFA;
+  --bg-secondary: #F0F4F4;
+  --bg-card: #FFFFFF;
+  --bg-card-elevated: #FFFFFF;
+  --text-primary: #111315;
+  --text-secondary: #687274;
+  --text-muted: #9AA3A4;
+  --border-subtle: #DDE4E4;
+  --accent-primary: #35C9B8;
+  --accent-dark: #159F91;
+  --accent-light: #D9F6F2;
+  --color-success: #22A06B;
+  --color-warning: #D99A24;
+  --color-error: #D94A4A;
+}
+
+html.dark {
+  /* DARK MODE — MINIMAL RED */
+  --bg-primary: #0B0B0C;
+  --bg-secondary: #111113;
+  --bg-card: #171719;
+  --bg-card-elevated: #1D1D20;
+  --text-primary: #F5F5F5;
+  --text-secondary: #A1A1A6;
+  --text-muted: #6F7075;
+  --border-subtle: #29292D;
+  --accent-primary: #E94B4B;
+  --accent-dark: #C93636;
+  --accent-light: #3A1F20;
+  --color-success: #4CAF7D;
+  --color-warning: #D9A441;
+  --color-error: #E94B4B;
+}
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', 'Readex Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    overflow-x: hidden;
+    min-height: 100vh;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+}
+
+/* Minimal sleek scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Number spinners reset */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Base button and card transitions */
+button {
+  touch-action: manipulation;
+}
+

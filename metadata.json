@@ -1,0 +1,6 @@
+{
+  "name": "عزم",
+  "description": "المساعد اليومي للياقة والعادات - تطبيق PWA دون إنترنت لتتبع تمارين المقاومة والأرقام القياسية والارتواء بالذكاء الاصطناعي",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
