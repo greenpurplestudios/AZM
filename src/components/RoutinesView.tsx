@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Routine, Exercise } from '../types';
 import { db } from '../db/dexie';
-import { Dumbbell, Play, Plus, Trash2, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { Dumbbell, Play, Plus, Trash2, ChevronDown, ChevronUp, Sparkles, Calendar } from 'lucide-react';
+import { CreateWorkoutPlanModal } from './CreateWorkoutPlanModal';
 
 interface RoutinesViewProps {
   onStartRoutine: (routine: Routine) => void;
@@ -15,15 +16,20 @@ export const RoutinesView: React.FC<RoutinesViewProps> = ({
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [expandedRoutineId, setExpandedRoutineId] = useState<string | null>(null);
+  const [isCreatePlanOpen, setIsCreatePlanOpen] = useState(false);
+
+  const loadData = async () => {
+    const allRoutines = await db.routines.toArray();
+    const allExercises = await db.exercises.toArray();
+    setRoutines(allRoutines);
+    setExercises(allExercises);
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      const allRoutines = await db.routines.toArray();
-      const allExercises = await db.exercises.toArray();
-      setRoutines(allRoutines);
-      setExercises(allExercises);
-    };
     loadData();
+    const handleUpdate = () => loadData();
+    window.addEventListener('azm-routines-updated', handleUpdate);
+    return () => window.removeEventListener('azm-routines-updated', handleUpdate);
   }, []);
 
   const getExerciseName = (exId: string) => {
@@ -55,24 +61,34 @@ export const RoutinesView: React.FC<RoutinesViewProps> = ({
       </div>
 
       {/* Top Banner & Quick Start */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="text-xl font-black text-white flex items-center gap-2">
             <Dumbbell className="w-6 h-6 text-emerald-400" />
             <span>جداول التمارين</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            اختر جدولاً جاهزاً أو ابدأ جلسة حرة وفورية في صالة الحديد
+            اختر جدولاً جاهزاً أو صمم خطتك الخاصة وسيتم جدولتها بالتقويم
           </p>
         </div>
 
-        <button
-          onClick={onStartQuickWorkout}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition shadow-md shadow-emerald-500/20 active:scale-95"
-        >
-          <Play className="w-3.5 h-3.5 fill-current" />
-          <span>تمرين حر</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsCreatePlanOpen(true)}
+            className="flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold text-xs transition active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>خطة جديدة</span>
+          </button>
+
+          <button
+            onClick={onStartQuickWorkout}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition shadow-md shadow-emerald-500/20 active:scale-95"
+          >
+            <Play className="w-3.5 h-3.5 fill-current" />
+            <span>تمرين حر</span>
+          </button>
+        </div>
       </div>
 
       {/* Routines List */}
@@ -172,6 +188,13 @@ export const RoutinesView: React.FC<RoutinesViewProps> = ({
           );
         })}
       </div>
+
+      {/* Create Workout Plan Modal with Instant Calendar Integration */}
+      <CreateWorkoutPlanModal
+        isOpen={isCreatePlanOpen}
+        onClose={() => setIsCreatePlanOpen(false)}
+        onPlanCreated={() => loadData()}
+      />
     </div>
   );
 };

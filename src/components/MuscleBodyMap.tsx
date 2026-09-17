@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MuscleType, MuscleRankTier, MuscleRank } from '../types';
 import { Eye, RotateCw } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { getTierConfig, TIER_CONFIGS } from '../utils/muscleLifts';
 
 interface MuscleBodyMapProps {
   muscleRanks: Record<string, MuscleRank>;
@@ -31,43 +32,23 @@ export const MuscleBodyMap: React.FC<MuscleBodyMapProps> = ({
           : isHovered
           ? isDark ? '#242428' : '#E8EEEE'
           : isDark ? '#171719' : '#F0F4F4',
-        stroke: isSelected ? colors.accent : colors.border,
+        stroke: isSelected ? colors.accent : (isDark ? '#2B2B30' : '#CBD5E1'),
         strokeWidth: isSelected ? '2.5' : '1',
-        opacity: isSelected ? '1' : '0.8',
+        opacity: isSelected ? '1' : '0.85',
       };
     }
 
-    // Ranked colors (Restrained theme-integrated scale)
-    const rank = data.rank;
-    let fill = isDark ? '#3A2022' : '#D9F6F2';
-    let stroke = colors.accent;
-
-    if (rank === 'D' || rank === 'C') {
-      // Beginner
-      fill = isDark ? '#2A2426' : '#E6EFEF';
-      stroke = isDark ? '#5C4447' : '#9EBAB5';
-    } else if (rank === 'C+' || rank === 'B-') {
-      // Intermediate
-      fill = isDark ? '#422427' : '#C7EDE7';
-      stroke = isDark ? '#8A3E43' : '#68C4B5';
-    } else if (rank === 'B' || rank === 'B+') {
-      // Advanced
-      fill = isDark ? '#6E282E' : '#7FE0D3';
-      stroke = isDark ? '#B83A41' : '#35C9B8';
-    } else if (rank === 'A-' || rank === 'A') {
-      // High Advanced
-      fill = isDark ? '#9A2E35' : '#45D1C1';
-      stroke = isDark ? '#E94B4B' : '#159F91';
-    } else if (rank === 'A+' || rank === 'S') {
-      // Elite
-      fill = colors.accent;
-      stroke = isDark ? '#FFFFFF' : '#111315';
-    }
+    const tierConfig = getTierConfig(data.rank);
+    const tierColor = tierConfig.color;
 
     return {
-      fill,
-      stroke: isSelected ? (isDark ? '#FFFFFF' : '#111315') : stroke,
-      strokeWidth: isSelected ? '2.5' : '1.2',
+      fill: isHovered
+        ? tierColor
+        : isDark
+        ? `${tierColor}55` // 33% hex alpha in dark mode
+        : `${tierColor}40`, // 25% hex alpha in light mode
+      stroke: isSelected ? (isDark ? '#FFFFFF' : '#0F172A') : tierColor,
+      strokeWidth: isSelected ? '2.5' : isHovered ? '2' : '1.5',
       opacity: '1',
     };
   };
@@ -487,7 +468,7 @@ export const MuscleBodyMap: React.FC<MuscleBodyMapProps> = ({
         )}
       </div>
 
-      {/* Restrained Ranking Legend */}
+      {/* Ranked System Legend */}
       <div
         className="pt-3 border-t flex items-center justify-between text-[11px] select-none flex-wrap gap-2"
         style={{
@@ -503,30 +484,35 @@ export const MuscleBodyMap: React.FC<MuscleBodyMapProps> = ({
               borderColor: colors.border,
             }}
           />
-          <span>غير مصنف (Unranked)</span>
+          <span className="text-[10px]">غير مصنف</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span
-            className="w-2.5 h-2.5 rounded-full"
-            style={{ backgroundColor: isDark ? '#422427' : '#C7EDE7' }}
-          />
-          <span>مبتدئ / متوسط</span>
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#CD7F32' }} />
+          <span className="text-[10px]">برونزي</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span
-            className="w-2.5 h-2.5 rounded-full"
-            style={{ backgroundColor: isDark ? '#9A2E35' : '#45D1C1' }}
-          />
-          <span>متقدم</span>
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#CBD5E1' }} />
+          <span className="text-[10px]">فضي</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span
-            className="w-2.5 h-2.5 rounded-full"
-            style={{ backgroundColor: colors.accent }}
-          />
-          <span className="font-bold" style={{ color: colors.accent }}>
-            نخبة (Elite)
-          </span>
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#F59E0B' }} />
+          <span className="text-[10px]">ذهبي</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#38BDF8' }} />
+          <span className="text-[10px]">بلاتيني</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#06B6D4' }} />
+          <span className="text-[10px]">ماسي</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#A855F7' }} />
+          <span className="text-[10px]">أنريل</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#E11D48' }} />
+          <span className="text-[10px] font-bold" style={{ color: '#E11D48' }}>توب 50</span>
         </div>
       </div>
     </div>

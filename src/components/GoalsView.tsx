@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Plus, Trash2, Calendar, Sparkles, Filter } from 'lucide-react';
 import { db } from '../db/dexie';
-import { DailyObjective } from '../types';
+import { DailyObjective, UserProfile } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { GoalsHydrationSection } from './GoalsHydrationSection';
 
-export const GoalsView: React.FC = () => {
+interface GoalsViewProps {
+  userProfile?: UserProfile;
+}
+
+export const GoalsView: React.FC<GoalsViewProps> = ({ userProfile }) => {
   const { isDark, colors } = useTheme();
   const [objectives, setObjectives] = useState<DailyObjective[]>([]);
   const [newTitle, setNewTitle] = useState('');
@@ -138,7 +143,10 @@ export const GoalsView: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Category Filter Chips */}
+      {/* 3. Water Hydration Section */}
+      <GoalsHydrationSection userProfile={userProfile} />
+
+      {/* 4. Category Filter Chips */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
         {[
           { id: 'all', label: 'الكل' },

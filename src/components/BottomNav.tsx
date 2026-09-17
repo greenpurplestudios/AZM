@@ -2,6 +2,7 @@ import React from 'react';
 import { Home, Dumbbell, CheckSquare, Calendar, MoreHorizontal } from 'lucide-react';
 import { AppTab } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface BottomNavProps {
   activeTab: AppTab;
@@ -15,37 +16,44 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   hasActiveSession,
 }) => {
   const { isDark, colors } = useTheme();
+  const { isRTL, t } = useLanguage();
 
   const tabs: {
     id: AppTab;
-    label: string;
+    labelKey: string;
+    fallback: string;
     icon: React.FC<{ className?: string; style?: React.CSSProperties }>;
     badge?: string;
   }[] = [
     {
       id: 'dashboard',
-      label: 'الرئيسية',
+      labelKey: 'nav.home',
+      fallback: isRTL ? 'الرئيسية' : 'Home',
       icon: Home,
     },
     {
       id: 'workout',
-      label: 'الجيم',
+      labelKey: 'nav.workout',
+      fallback: isRTL ? 'التمرين' : 'Training',
       icon: Dumbbell,
-      badge: hasActiveSession ? 'نشط' : undefined,
+      badge: hasActiveSession ? t('nav.active', 'نشط') : undefined,
     },
     {
       id: 'goals',
-      label: 'الأهداف',
+      labelKey: 'nav.goals',
+      fallback: isRTL ? 'الأهداف' : 'Goals',
       icon: CheckSquare,
     },
     {
       id: 'calendar',
-      label: 'التقويم',
+      labelKey: 'nav.calendar',
+      fallback: isRTL ? 'التقويم' : 'Calendar',
       icon: Calendar,
     },
     {
       id: 'more',
-      label: 'المزيد',
+      labelKey: 'nav.more',
+      fallback: isRTL ? 'المزيد' : 'More',
       icon: MoreHorizontal,
     },
   ];
@@ -53,7 +61,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   // Map sub-tabs to their parent tab in bottom nav
   const isSelected = (tabId: AppTab) => {
     if (activeTab === tabId) return true;
-    if (tabId === 'more' && ['muscles', 'progress', 'routines', 'water', 'profile'].includes(activeTab)) {
+    if (
+      tabId === 'more' &&
+      [
+        'muscles',
+        'progress',
+        'routines',
+        'water',
+        'profile',
+        'leaderboards',
+        'calories',
+        'athletic_tools',
+      ].includes(activeTab)
+    ) {
       return true;
     }
     return false;
@@ -66,6 +86,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       style={{
         backgroundColor: isDark ? '#0B0B0C' : '#FFFFFF',
         borderTop: `1px solid ${colors.border}`,
+        direction: isRTL ? 'rtl' : 'ltr',
       }}
     >
       <div className="max-w-md mx-auto grid grid-cols-5 items-center">
@@ -100,18 +121,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               </div>
 
               <span
-                className="text-[11px] mt-1 font-medium tracking-tight"
+                className="text-[11px] mt-1 font-bold tracking-tight"
                 style={{
-                  fontWeight: active ? 700 : 500,
-                  color: active ? colors.accent : colors.textMuted,
+                  color: active ? colors.textPrimary : colors.textSecondary,
                 }}
               >
-                {tab.label}
+                {t(tab.labelKey, tab.fallback)}
               </span>
 
               {active && (
-                <span
-                  className="absolute -bottom-1 w-3 h-0.5 rounded-full"
+                <div
+                  className="w-1.5 h-1.5 rounded-full mt-0.5"
                   style={{ backgroundColor: colors.accent }}
                 />
               )}

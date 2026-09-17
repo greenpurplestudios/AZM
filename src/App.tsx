@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { db, initializeDatabaseDefaults } from './db/dexie';
 import { UserProfile, WorkoutSession, Routine, WorkoutSet, AppTab } from './types';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { PWAInstallButton } from './components/PWAInstallButton';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { BottomNav } from './components/BottomNav';
 import { DashboardView } from './components/DashboardView';
 import { WorkoutHubView } from './components/WorkoutHubView';
@@ -16,13 +18,24 @@ import { RoutinesView } from './components/RoutinesView';
 import { WaterTrackerView } from './components/WaterTrackerView';
 import { ProfileView } from './components/ProfileView';
 import { MoreHubView } from './components/MoreHubView';
+import { LeaderboardsView } from './components/LeaderboardsView';
+import { CalorieTrackerView } from './components/CalorieTrackerView';
+import { AthleticToolsView } from './components/AthleticToolsView';
 import { WorkoutCelebrationModal } from './components/WorkoutCelebrationModal';
 import { AzmLogo } from './components/AzmLogo';
 
 function MainApp() {
   const { isDark, colors } = useTheme();
+  const { isRTL, t } = useLanguage();
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
+  const [previousTab, setPreviousTab] = useState<AppTab>('dashboard');
+
+  const handleNavigateTab = (tab: AppTab) => {
+    setPreviousTab(activeTab);
+    setActiveTab(tab);
+  };
   const [userProfile, setUserProfile] = useState<UserProfile>({
     id: 'current_user',
     name: 'قيس',
@@ -31,6 +44,7 @@ function MainApp() {
     daily_water_target_ml: 2625,
     is_workout_day: true,
     equipment: ['barbell', 'dumbbells', 'pullup_bar', 'bench'],
+    show_in_leaderboard: true,
   });
   const [activeSession, setActiveSession] = useState<WorkoutSession | null>(null);
   const [completedCelebration, setCompletedCelebration] = useState<{
@@ -68,7 +82,7 @@ function MainApp() {
   const handleStartQuickWorkout = () => {
     const newSession: WorkoutSession = {
       id: `session_${Date.now()}`,
-      routine_title: 'تمرين حر سريع',
+      routine_title: isRTL ? 'تمرين حر سريع' : 'Quick Freestyle Workout',
       started_at: new Date().toISOString(),
       is_completed: false,
       sets: [],
@@ -164,14 +178,15 @@ function MainApp() {
         style={{
           backgroundColor: isDark ? '#0B0B0C' : '#F7F9F9',
           color: isDark ? '#F5F5F5' : '#111315',
+          direction: isRTL ? 'rtl' : 'ltr',
         }}
       >
         <div className="mb-4 animate-pulse">
           <AzmLogo size="lg" showText={false} />
         </div>
-        <h1 className="text-2xl font-black">عَــزْم</h1>
+        <h1 className="text-2xl font-black">{t('header.brand')}</h1>
         <p className="text-xs mt-1" style={{ color: colors.textSecondary }}>
-          جاري تهيئة قاعدة البيانات والأهداف اليومية...
+          {isRTL ? 'جاري تهيئة منظومة عزم وقاعدة البيانات...' : 'Initializing AZM Fitness System...'}
         </p>
       </div>
     );
@@ -191,7 +206,7 @@ function MainApp() {
 
   return (
     <div
-      dir="rtl"
+      dir={isRTL ? 'rtl' : 'ltr'}
       className="min-h-screen flex flex-col selection:bg-teal-500/20 transition-colors duration-200"
       style={{
         backgroundColor: colors.bgPrimary,
@@ -201,7 +216,7 @@ function MainApp() {
       {/* Offline Alert Badge */}
       <OfflineIndicator />
 
-      {/* Top Application Header: Decorated Obsidian Athletic Bar */}
+      {/* Top Application Header */}
       <header
         className="sticky top-0 z-30 px-4 py-2.5 select-none backdrop-blur-xl bg-[#0B0B0C]/90 border-b border-[#232328] relative overflow-hidden"
       >
@@ -211,7 +226,7 @@ function MainApp() {
         {/* Ambient magma glow behind logo */}
         <div className="absolute -top-6 right-0 w-36 h-20 bg-[#E94B4B]/15 blur-2xl pointer-events-none rounded-full" />
 
-        <div className="max-w-xl mx-auto flex items-center justify-between relative z-10">
+        <div className="max-w-2xl mx-auto flex items-center justify-between relative z-10">
           <div
             className="flex items-center gap-2 cursor-pointer active:scale-95 transition-transform"
             onClick={() => setActiveTab('dashboard')}
@@ -219,8 +234,9 @@ function MainApp() {
             <AzmLogo size="sm" showText={true} />
           </div>
 
-          {/* Quick Header Tools */}
+          {/* Quick Header Tools (Language Switcher & PWA Install) */}
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             <PWAInstallButton />
           </div>
         </div>
@@ -231,7 +247,7 @@ function MainApp() {
         {activeTab === 'dashboard' && (
           <DashboardView
             userProfile={userProfile}
-            onNavigateTab={(tab) => setActiveTab(tab)}
+            onNavigateTab={handleNavigateTab}
             onStartRoutine={handleStartRoutine}
             onQuickStartWorkout={handleStartQuickWorkout}
             onAddWater={handleAddWaterQuick}
@@ -247,7 +263,9 @@ function MainApp() {
           />
         )}
 
-        {activeTab === 'goals' && <GoalsView />}
+        {(activeTab === 'goals' || activeTab === 'water') && (
+          <GoalsView userProfile={userProfile} />
+        )}
 
         {activeTab === 'calendar' && (
           <CalendarView
@@ -285,14 +303,34 @@ function MainApp() {
           <ProfileView
             userProfile={userProfile}
             onUpdateProfile={setUserProfile}
+            onNavigateLeaderboards={() => handleNavigateTab('leaderboards')}
           />
         )}
 
         {activeTab === 'more' && (
           <MoreHubView
             userProfile={userProfile}
-            onNavigate={(tab) => setActiveTab(tab)}
+            onNavigate={handleNavigateTab}
           />
+        )}
+
+        {activeTab === 'leaderboards' && (
+          <LeaderboardsView
+            userProfile={userProfile}
+            onBack={() => setActiveTab(previousTab === 'leaderboards' ? 'dashboard' : previousTab)}
+          />
+        )}
+
+        {activeTab === 'calories' && (
+          <CalorieTrackerView
+            userProfile={userProfile}
+            onUpdateProfile={setUserProfile}
+            onBack={() => setActiveTab('more')}
+          />
+        )}
+
+        {activeTab === 'athletic_tools' && (
+          <AthleticToolsView onBack={() => setActiveTab('more')} />
         )}
       </main>
 
@@ -327,7 +365,9 @@ function MainApp() {
 export default function App() {
   return (
     <ThemeProvider>
-      <MainApp />
+      <LanguageProvider>
+        <MainApp />
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

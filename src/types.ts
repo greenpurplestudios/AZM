@@ -14,6 +14,8 @@ export type EquipmentType =
   | 'pullup_bar'
   | 'bodyweight';
 
+export type GymAccessType = 'gym' | 'home' | 'both';
+
 // 1. User & Preferences
 export interface UserProfile {
   id: string;
@@ -24,9 +26,22 @@ export interface UserProfile {
   last_active_date?: string; // YYYY-MM-DD
   is_workout_day?: boolean;
   equipment?: EquipmentType[]; // Selected available equipment
+  gym_access?: GymAccessType; // Access: gym, home, or both
+  avatar_url?: string; // Profile picture base64 data URL
+  bio?: string; // User athletic bio
+  show_in_leaderboard?: boolean; // Privacy setting
+  height_cm?: number;
+  age?: number;
+  gender?: 'male' | 'female';
+  activity_level?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+  fitness_goal?: 'maintain' | 'cut' | 'lean_bulk' | 'bulk';
+  target_calories?: number;
+  target_protein_g?: number;
+  target_carbs_g?: number;
+  target_fat_g?: number;
 }
 
-// 2. Muscle Ranking System (Liftoff Inspired)
+// 2. Muscle Ranking System (الرتبة العضلي)
 export type MuscleType =
   | 'chest'
   | 'back'
@@ -42,6 +57,14 @@ export type MuscleType =
 
 export type MuscleRankTier =
   | 'UNRANKED'
+  | 'BRONZE'
+  | 'SILVER'
+  | 'GOLD'
+  | 'PLATINUM'
+  | 'DIAMOND'
+  | 'UNREAL'
+  | 'TOP_50'
+  // Legacy aliases for backward compatibility
   | 'D'
   | 'C'
   | 'C+'
@@ -249,6 +272,70 @@ export interface DailyObjective {
   created_at?: string;
 }
 
+// 11. Nutrition & Calorie Tracking System (حاسبة السعرات)
+export type NutritionUnit = 'g' | 'kg' | 'ml' | 'piece' | 'serving' | 'cup' | 'tbsp' | 'tsp';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+
+export interface FoodItem {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  category: string;
+  calories_per_100g: number;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
+  fiber_per_100g?: number;
+  sugar_per_100g?: number;
+  saturated_fat_per_100g?: number;
+  sodium_mg_per_100g?: number;
+  serving_size_g: number;
+  serving_label_ar: string;
+  serving_label_en: string;
+  allowed_units: NutritionUnit[];
+  unit_gram_multiplier?: Partial<Record<NutritionUnit, number>>;
+  data_source: string;
+}
+
+export interface FoodLogEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  meal: MealType;
+  food_id: string;
+  food_name_ar: string;
+  food_name_en: string;
+  quantity: number;
+  unit: NutritionUnit;
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  created_at: string;
+}
+
+// 12. Leaderboards (لوائح الصدارة)
+export type PRCategory = 'bench_press' | 'deadlift' | 'squat' | 'push_up' | 'pull_up';
+
+export interface LeaderboardPlayer {
+  id: string;
+  name: string;
+  username: string;
+  avatar_url?: string;
+  bio?: string;
+  best_streak: number;
+  current_streak: number;
+  consistency_days: number;
+  consistency_percentage: number;
+  prs: {
+    bench_press_kg?: number;
+    deadlift_kg?: number;
+    squat_kg?: number;
+    push_up_reps?: number;
+    pull_up_reps?: number;
+  };
+  is_current_user?: boolean;
+}
+
 // UI Navigation Tabs
 export type AppTab =
   | 'dashboard'
@@ -260,5 +347,9 @@ export type AppTab =
   | 'muscles'
   | 'water'
   | 'routines'
-  | 'profile';
+  | 'profile'
+  | 'leaderboards'
+  | 'calories'
+  | 'athletic_tools';
+
 

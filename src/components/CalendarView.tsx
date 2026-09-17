@@ -7,6 +7,7 @@ import {
 } from '../types';
 import { db } from '../db/dexie';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   Calendar as CalendarIcon,
   ChevronRight,
@@ -19,6 +20,7 @@ import {
   Sparkles,
   BedDouble,
 } from 'lucide-react';
+import { CreateWorkoutPlanModal } from './CreateWorkoutPlanModal';
 
 interface CalendarViewProps {
   userProfile: UserProfile;
@@ -30,6 +32,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onStartWorkoutClick,
 }) => {
   const { isDark, colors } = useTheme();
+  const { isRTL, language, t } = useLanguage();
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string>(
@@ -38,6 +41,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [completedSessions, setCompletedSessions] = useState<WorkoutSession[]>([]);
   const [isAddingEvent, setIsAddingEvent] = useState(false);
+  const [isCreatePlanOpen, setIsCreatePlanOpen] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventTime, setNewEventTime] = useState('17:00');
   const [newEventCategory, setNewEventCategory] = useState<EventCategory>('workout');
@@ -55,6 +59,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   useEffect(() => {
     loadData();
+    const handleUpdated = () => loadData();
+    window.addEventListener('azm-calendar-updated', handleUpdated);
+    return () => window.removeEventListener('azm-calendar-updated', handleUpdated);
   }, []);
 
   // Calendar calculations
@@ -72,12 +79,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
-  const monthName = currentDate.toLocaleDateString('ar-EG', {
+  const monthName = currentDate.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
     month: 'long',
     year: 'numeric',
   });
 
-  const dayNames = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+  const dayNames = language === 'ar'
+    ? ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت']
+    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   // Identify status for each date in current month
   const getDayInfo = (day: number) => {
@@ -140,7 +149,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const selectedDayEvents = events.filter((e) => e.date === selectedDateStr);
 
   const selectedDateObj = new Date(selectedDateStr + 'T00:00:00');
-  const selectedDateHuman = selectedDateObj.toLocaleDateString('ar-EG', {
+  const selectedDateHuman = selectedDateObj.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -149,22 +158,34 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   return (
     <div
       id="azm-calendar-view"
-      className="p-4 sm:p-6 max-w-xl mx-auto space-y-7 pb-28 text-right select-none transition-colors duration-200"
+      className="p-4 sm:p-6 max-w-xl mx-auto space-y-7 pb-28 select-none transition-colors duration-200"
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* 1. Header */}
-      <div className="space-y-1">
-        <span
-          className="text-xs font-semibold uppercase tracking-wider block"
-          style={{ color: colors.textMuted }}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <span
+            className="text-xs font-semibold uppercase tracking-wider block"
+            style={{ color: colors.textMuted }}
+          >
+            {language === 'ar' ? 'التقويم والتخطيط' : 'Calendar & Planning'}
+          </span>
+          <h1
+            className="text-2xl sm:text-3xl font-bold tracking-tight"
+            style={{ color: colors.textPrimary }}
+          >
+            {t('calendar.title')}
+          </h1>
+        </div>
+
+        <button
+          onClick={() => setIsCreatePlanOpen(true)}
+          className="px-3.5 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 shadow-md active:scale-95 transition"
+          style={{ backgroundColor: colors.accent }}
         >
-          التقويم والتخطيط • Calendar
-        </span>
-        <h1
-          className="text-2xl sm:text-3xl font-bold tracking-tight"
-          style={{ color: colors.textPrimary }}
-        >
-          جدول التمارين والمواعيد
-        </h1>
+          <Plus className="w-4 h-4" />
+          <span>{language === 'ar' ? 'خطة تمرين جديدة' : 'New Workout Plan'}</span>
+        </button>
       </div>
 
       {/* 2. Month Grid Card */}
@@ -178,7 +199,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         {/* Month Selector Navigation */}
         <div className="flex items-center justify-between">
           <button
-            onClick={nextMonth}
+            onClick={isRTL ? nextMonth : prevMonth}
             className="p-2 rounded-xl border hover:opacity-80 transition-all active:scale-95"
             style={{ borderColor: colors.border, color: colors.textPrimary }}
           >
@@ -193,7 +214,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </h3>
 
           <button
-            onClick={prevMonth}
+            onClick={isRTL ? prevMonth : nextMonth}
             className="p-2 rounded-xl border hover:opacity-80 transition-all active:scale-95"
             style={{ borderColor: colors.border, color: colors.textPrimary }}
           >
@@ -261,21 +282,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     <span
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: colors.accent }}
-                      title="تمرين مكتمل"
+                      title={language === 'ar' ? 'تمرين مكتمل' : 'Completed Workout'}
                     />
                   )}
                   {hasScheduledWorkout && !hasWorkoutSession && (
                     <span
                       className="w-1.5 h-1.5 rounded-full border"
                       style={{ borderColor: colors.accent }}
-                      title="تمرين مجدول"
+                      title={language === 'ar' ? 'تمرين مجدول' : 'Scheduled Workout'}
                     />
                   )}
                   {isRest && (
                     <span
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: colors.textMuted }}
-                      title="يوم استشفاء وراحة"
+                      title={language === 'ar' ? 'يوم استشفاء وراحة' : 'Rest & Recovery Day'}
                     />
                   )}
                 </div>
@@ -294,21 +315,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               className="w-2 h-2 rounded-full"
               style={{ backgroundColor: colors.accent }}
             />
-            <span>تمرين مكتمل</span>
+            <span>{t('calendar.completed')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span
               className="w-2 h-2 rounded-full border"
               style={{ borderColor: colors.accent }}
             />
-            <span>تمرين مجدول</span>
+            <span>{t('calendar.scheduled')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span
               className="w-2 h-2 rounded-full"
               style={{ backgroundColor: colors.textMuted }}
             />
-            <span>راحة واستشفاء</span>
+            <span>{t('calendar.rest')}</span>
           </div>
         </div>
       </div>
@@ -321,7 +342,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               className="text-xs font-semibold uppercase tracking-wider block"
               style={{ color: colors.textMuted }}
             >
-              تفاصيل اليوم المحدد
+              {language === 'ar' ? 'تفاصيل اليوم المحدد' : 'Selected Day Details'}
             </span>
             <h2
               className="text-base font-bold tracking-tight"
@@ -341,7 +362,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             }}
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>إضافة موعد</span>
+            <span>{language === 'ar' ? 'إضافة موعد' : 'Add Event'}</span>
           </button>
         </div>
 
@@ -359,7 +380,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               type="text"
               value={newEventTitle}
               onChange={(e) => setNewEventTitle(e.target.value)}
-              placeholder="عنوان التمرين أو الموعد (مثال: تمرين أرجل، مراجعة)..."
+              placeholder={language === 'ar' ? 'عنوان التمرين أو الموعد (مثال: تمرين أرجل، مراجعة)...' : 'Event or workout title (e.g., Leg Day, Study)...'}
               autoFocus
               className="w-full bg-transparent text-sm focus:outline-hidden"
               style={{ color: colors.textPrimary }}
@@ -388,10 +409,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   color: colors.textPrimary,
                 }}
               >
-                <option value="workout">تمرين رياضي</option>
-                <option value="study">مذاكرة ودراسة</option>
-                <option value="appointment">موعد شخصي</option>
-                <option value="general">عام / أخرى</option>
+                <option value="workout">{language === 'ar' ? 'تمرين رياضي' : 'Workout'}</option>
+                <option value="study">{language === 'ar' ? 'مذاكرة ودراسة' : 'Study'}</option>
+                <option value="appointment">{language === 'ar' ? 'موعد شخصي' : 'Appointment'}</option>
+                <option value="general">{language === 'ar' ? 'عام / أخرى' : 'General / Other'}</option>
               </select>
             </div>
 
@@ -402,14 +423,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 className="px-3 py-1.5 rounded-lg text-xs font-medium border"
                 style={{ borderColor: colors.border, color: colors.textSecondary }}
               >
-                إلغاء
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-1.5 rounded-lg text-xs font-bold text-white"
                 style={{ backgroundColor: colors.accent }}
               >
-                حفظ في التقويم
+                {language === 'ar' ? 'حفظ في التقويم' : 'Save to Calendar'}
               </button>
             </div>
           </form>
@@ -422,7 +443,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               className="text-xs font-semibold uppercase tracking-wider px-1"
               style={{ color: colors.textMuted }}
             >
-              التمارين المنجزة في هذا اليوم
+              {language === 'ar' ? 'التمارين المنجزة في هذا اليوم' : 'Completed Workouts Today'}
             </span>
             {selectedDaySessions.map((s) => (
               <div
@@ -448,13 +469,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       className="text-sm font-bold"
                       style={{ color: colors.textPrimary }}
                     >
-                      {s.routine_title || 'تمرين مقاومة'}
+                      {s.routine_title || (language === 'ar' ? 'تمرين مقاومة' : 'Resistance Training')}
                     </h4>
                     <span
                       className="text-xs"
                       style={{ color: colors.textSecondary }}
                     >
-                      {Math.round((s.duration_seconds || 1800) / 60)} دقيقة • {s.sets?.length || 0} جولات
+                      {Math.round((s.duration_seconds || 1800) / 60)} {language === 'ar' ? 'دقيقة' : 'min'} • {s.sets?.length || 0} {language === 'ar' ? 'جولات' : 'sets'}
                     </span>
                   </div>
                 </div>
@@ -463,7 +484,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   className="text-xs font-bold font-mono"
                   style={{ color: colors.accent }}
                 >
-                  مكتمل ✓
+                  {language === 'ar' ? 'مكتمل ✓' : 'Done ✓'}
                 </span>
               </div>
             ))}
@@ -477,7 +498,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               className="text-xs font-semibold uppercase tracking-wider px-1"
               style={{ color: colors.textMuted }}
             >
-              المواعيد والمهام المجدولة
+              {language === 'ar' ? 'المواعيد والمهام المجدولة' : 'Scheduled Events & Tasks'}
             </span>
             <div
               className="rounded-2xl border divide-y overflow-hidden"
@@ -513,7 +534,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                         {ev.title}
                       </h4>
                       <span style={{ color: colors.textSecondary }}>
-                        {ev.start_time || 'طوال اليوم'}
+                        {ev.start_time || (language === 'ar' ? 'طوال اليوم' : 'All day')}
                       </span>
                     </div>
                   </div>
@@ -521,7 +542,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   <button
                     onClick={() => handleDeleteEvent(ev.id)}
                     className="p-1 rounded-md hover:bg-red-500/10 text-red-500"
-                    title="حذف"
+                    title={language === 'ar' ? 'حذف' : 'Delete'}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -539,11 +560,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 color: colors.textSecondary,
               }}
             >
-              لا توجد تمارين أو مواعيد مسجلة في هذا اليوم.
+              {language === 'ar'
+                ? 'لا توجد تمارين أو مواعيد مسجلة في هذا اليوم.'
+                : 'No scheduled workouts or events for this date.'}
             </div>
           )
         )}
       </div>
+
+      {/* Create Workout Plan Modal with Instant Calendar Integration */}
+      <CreateWorkoutPlanModal
+        isOpen={isCreatePlanOpen}
+        onClose={() => setIsCreatePlanOpen(false)}
+        onPlanCreated={() => loadData()}
+      />
     </div>
   );
 };

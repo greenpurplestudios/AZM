@@ -11,6 +11,7 @@ import {
   MuscleRank,
   BestLift,
   DailyObjective,
+  FoodLogEntry,
 } from '../types';
 
 export class AzmDatabase extends Dexie {
@@ -25,6 +26,7 @@ export class AzmDatabase extends Dexie {
   muscle_ranks!: Table<MuscleRank, string>;
   best_lifts!: Table<BestLift, string>;
   daily_objectives!: Table<DailyObjective, string>;
+  food_logs!: Table<FoodLogEntry, string>;
 
   constructor() {
     super('AzmFitnessDB');
@@ -78,6 +80,22 @@ export class AzmDatabase extends Dexie {
       muscle_ranks: 'muscle_id, score, rank',
       best_lifts: 'muscle_id, exercise_name, updated_at',
       daily_objectives: 'id, date, completed',
+    });
+
+    // Version 5: Nutrition & Calorie Tracking System
+    this.version(5).stores({
+      user_profile: 'id',
+      water_logs: 'id, date',
+      exercises: 'id, category, name, equipment_type',
+      routines: 'id, title',
+      workout_sessions: 'id, started_at, is_completed',
+      workout_sets: 'id, session_id, exercise_id, completed',
+      personal_records: 'id, exercise_id, weight_kg',
+      calendar_events: 'id, date, category, is_completed',
+      muscle_ranks: 'muscle_id, score, rank',
+      best_lifts: 'muscle_id, exercise_name, updated_at',
+      daily_objectives: 'id, date, completed',
+      food_logs: 'id, date, meal, food_id',
     });
   }
 }

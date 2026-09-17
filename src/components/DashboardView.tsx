@@ -7,8 +7,9 @@ import {
 } from '../types';
 import { db } from '../db/dexie';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { AzmLogo } from './AzmLogo';
-import { Check, Flame, Play, ArrowLeft, Dumbbell, Plus, Trash2, Target } from 'lucide-react';
+import { Check, Play, ArrowLeft, Plus, Trash2, Target, Trophy } from 'lucide-react';
 
 interface DashboardViewProps {
   userProfile: UserProfile;
@@ -24,7 +25,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onStartRoutine,
   onQuickStartWorkout,
 }) => {
-  const { isDark, colors } = useTheme();
+  const { colors } = useTheme();
+  const { t, language, isRTL } = useLanguage();
   const [objectives, setObjectives] = useState<DailyObjective[]>([]);
   const [todayRoutine, setTodayRoutine] = useState<Routine | null>(null);
   const [quickTitle, setQuickTitle] = useState('');
@@ -132,12 +134,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   // Determine greeting based on time of day
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'صباح الخير،' : hour < 17 ? 'طاب يومك،' : 'مساء الخير،';
+  const greeting = language === 'ar'
+    ? (hour < 12 ? 'صباح الخير،' : hour < 17 ? 'طاب يومك،' : 'مساء الخير،')
+    : (hour < 12 ? 'Good morning,' : hour < 17 ? 'Good afternoon,' : 'Good evening,');
 
   return (
     <div
       id="azm-dashboard-view"
-      className="relative w-full min-h-[calc(100vh-60px)] overflow-hidden text-right select-none"
+      className="relative w-full min-h-[calc(100vh-60px)] overflow-hidden select-none"
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Seamless edge-to-edge Night background with atmospheric gradient overlay */}
       <div className="absolute inset-0 w-full h-full pointer-events-none -z-0 select-none overflow-hidden" aria-hidden="true">
@@ -151,7 +156,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Foreground Content */}
-      <div className="relative z-10 p-4 sm:p-6 max-w-xl mx-auto space-y-6 pb-28 text-right select-none">
+      <div className="relative z-10 p-4 sm:p-6 max-w-xl mx-auto space-y-6 pb-28 select-none">
         
         {/* Top User Greeting & Streak Status */}
         <div className="flex items-center justify-between px-1 pt-1">
@@ -163,37 +168,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="text-xl sm:text-2xl font-bold text-[#F5F5F5] tracking-tight mt-0.5"
               style={{ fontFamily: "'Readex Pro', sans-serif" }}
             >
-              {userProfile.name || 'قيس'}
+              {userProfile.name || (language === 'ar' ? 'بطل عزم' : 'AZM Athlete')}
             </h1>
           </div>
 
-          {/* Premium Streak Counter Badge */}
-          <div
-            onClick={() => onNavigateTab('calendar')}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#16161A] border border-[#2A2A30] hover:border-[#E94B4B]/40 transition-all cursor-pointer shadow-sm active:scale-95 group"
-            title="سلسلة الالتزام"
+          {/* Leaderboard Shortcut Button */}
+          <button
+            id="dashboard-leaderboard-shortcut-btn"
+            type="button"
+            onClick={() => onNavigateTab('leaderboards')}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#16161A] border border-[#2A2A30] hover:border-[#F59E0B]/50 hover:bg-[#1C1C22] transition-all cursor-pointer shadow-sm active:scale-95 group select-none"
+            title={language === 'ar' ? 'لوائح الصدارة' : 'Leaderboards'}
           >
-            <span className="text-base leading-none">🔥</span>
-            <div className="flex items-baseline gap-1 text-xs font-medium">
-              <span className="text-[#F5F5F5] font-bold font-mono text-sm">
-                {userProfile.streak_count || 1}
-              </span>
-              <span className="text-[#A1A1A6] text-[11px]">
-                {(userProfile.streak_count || 1) === 1
-                  ? 'يوم متواصل'
-                  : (userProfile.streak_count || 1) === 2
-                  ? 'يومان'
-                  : (userProfile.streak_count || 1) <= 10
-                  ? 'أيام'
-                  : 'يوماً'}
-              </span>
-            </div>
-          </div>
+            <Trophy className="w-4 h-4 text-[#F59E0B] transition-transform duration-200 group-hover:scale-110" />
+            <span className="text-xs font-bold text-[#F5F5F5] tracking-tight">
+              {language === 'ar' ? 'لوائح الصدارة' : 'Leaderboards'}
+            </span>
+          </button>
         </div>
 
         {/* Brand Logo Section */}
         <div className="relative py-4 sm:py-5 flex flex-col items-center justify-center text-center select-none">
-          {/* Ambient magma radial halo centered behind logo */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-36 rounded-full bg-red-600/15 blur-3xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col items-center justify-center text-center">
@@ -203,7 +198,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="text-3xl sm:text-4xl font-bold tracking-tight mt-3 text-[#F5F5F5]"
               style={{ fontFamily: "'Readex Pro', sans-serif" }}
             >
-              عزم
+              {language === 'ar' ? 'عَــزْم' : 'AZM'}
             </h2>
           </div>
         </div>
@@ -217,15 +212,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 className="text-sm font-bold tracking-tight"
                 style={{ color: colors.textPrimary }}
               >
-                أهداف اليوم • Today's Targets
+                {language === 'ar' ? 'أهداف اليوم' : "Today's Targets"}
               </h3>
               <span
                 className="text-xs font-mono font-medium"
                 style={{ color: colors.textSecondary }}
               >
                 {totalCount > 0
-                  ? `${completedCount} من ${totalCount} أهداف مكتملة (${progressPercent}%)`
-                  : 'لا توجد أهداف مضافة لليوم'}
+                  ? language === 'ar'
+                    ? `${completedCount} من ${totalCount} أهداف مكتملة (${progressPercent}%)`
+                    : `${completedCount} of ${totalCount} targets completed (${progressPercent}%)`
+                  : language === 'ar'
+                  ? 'لا توجد أهداف مضافة لليوم'
+                  : 'No targets added for today'}
               </span>
             </div>
 
@@ -240,15 +239,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 }}
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>إضافة هدف</span>
+                <span>{language === 'ar' ? 'إضافة هدف' : 'Add Target'}</span>
               </button>
               <button
                 onClick={() => onNavigateTab('goals')}
                 className="text-xs font-semibold flex items-center gap-1 hover:opacity-80 transition-opacity"
                 style={{ color: colors.textMuted }}
               >
-                <span>كل الأهداف</span>
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>{language === 'ar' ? 'كل الأهداف' : 'All Targets'}</span>
+                <ArrowLeft className={`w-3.5 h-3.5 ${!isRTL ? 'rotate-180' : ''}`} />
               </button>
             </div>
           </div>
@@ -280,7 +279,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 autoFocus
                 value={quickTitle}
                 onChange={(e) => setQuickTitle(e.target.value)}
-                placeholder="اكتب هدفك لليوم (مثال: شرب 2 لتر ماء، تمرين صدر...)"
+                placeholder={
+                  language === 'ar'
+                    ? 'اكتب هدفك لليوم (مثال: شرب لترين ماء، تمرين صدر...)'
+                    : 'Enter target (e.g., Drink 2L water, Chest workout...)'
+                }
                 className="flex-1 bg-transparent px-2.5 py-1.5 text-sm text-[#F5F5F5] placeholder-[#6F7075] outline-none"
               />
               <button
@@ -288,7 +291,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 disabled={!quickTitle.trim()}
                 className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#E94B4B] text-white disabled:opacity-40 transition-opacity cursor-pointer"
               >
-                حفظ
+                {t('common.save')}
               </button>
               <button
                 type="button"
@@ -298,7 +301,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 }}
                 className="px-2 py-1.5 text-xs text-[#A1A1A6] hover:text-[#F5F5F5] cursor-pointer"
               >
-                إلغاء
+                {t('common.cancel')}
               </button>
             </form>
           )}
@@ -317,9 +320,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <Target className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-bold text-[#F5F5F5]">لا توجد أهداف مضافة لليوم</p>
+                  <p className="text-sm font-bold text-[#F5F5F5]">
+                    {language === 'ar' ? 'لا توجد أهداف مضافة لليوم' : 'No targets added for today'}
+                  </p>
                   <p className="text-xs text-[#A1A1A6] max-w-xs mx-auto">
-                    ابدأ يومك بإضافة أهدافك وتحدياتك لتتبع إنجازك وانضباطك
+                    {language === 'ar'
+                      ? 'ابدأ يومك بإضافة أهدافك وتحدياتك لتتبع إنجازك وانضباطك'
+                      : 'Start your day by adding goals to track your discipline'}
                   </p>
                 </div>
                 {!isAddingQuick && (
@@ -328,7 +335,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E94B4B] hover:bg-[#C93636] text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>أضف أول هدف لليوم</span>
+                    <span>{language === 'ar' ? 'أضف أول هدف لليوم' : 'Add First Target'}</span>
                   </button>
                 )}
               </div>
@@ -368,7 +375,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <button
                     onClick={(e) => handleDeleteObjective(obj.id, e)}
                     className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md hover:bg-[#E94B4B]/15 text-[#6F7075] hover:text-[#E94B4B] transition-opacity cursor-pointer"
-                    title="حذف الهدف"
+                    title={t('common.delete')}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -393,13 +400,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="text-[10px] font-mono font-bold uppercase tracking-wider block"
               style={{ color: colors.accent }}
             >
-              تدريب اليوم الموصى به
+              {language === 'ar' ? 'تدريب اليوم الموصى به' : "Today's Recommended Workout"}
             </span>
             <h4
               className="text-base font-bold tracking-tight"
               style={{ color: colors.textPrimary }}
             >
-              {todayRoutine?.title || 'تمرين الدفع (Push Day)'}
+              {todayRoutine?.title || (language === 'ar' ? 'تمرين الدفع الأول' : 'Push Day Session')}
             </h4>
           </div>
 
@@ -415,7 +422,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             style={{ backgroundColor: colors.accent }}
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            <span>ابدأ التمرين</span>
+            <span>{language === 'ar' ? 'ابدأ التمرين' : 'Start Workout'}</span>
           </button>
         </div>
       </div>

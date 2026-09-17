@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Routine, WorkoutSession, UserProfile, Exercise, PersonalRecord } from '../types';
+import {
+  Routine,
+  WorkoutSession,
+  UserProfile,
+  PersonalRecord,
+  MuscleRank,
+  BestLift,
+  CalendarEvent,
+  MuscleType,
+} from '../types';
 import { db } from '../db/dexie';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   Play,
   Dumbbell,
@@ -12,7 +22,24 @@ import {
   Plus,
   ArrowLeft,
   ChevronLeft,
+  Calendar,
+  Sparkles,
+  ChevronRight,
+  Flame,
+  CheckCircle2,
+  CalendarDays,
+  Activity,
+  Layers,
+  X,
 } from 'lucide-react';
+import { MuscleBodyMap } from './MuscleBodyMap';
+import { MuscleRanksView } from './MuscleRanksView';
+import { CreateWorkoutPlanModal } from './CreateWorkoutPlanModal';
+import {
+  computeMuscleRanksFromLifts,
+  getTierConfig,
+  TIER_CONFIGS,
+} from '../utils/muscleLifts';
 
 interface WorkoutHubViewProps {
   onStartQuickWorkout: () => void;
@@ -28,334 +55,421 @@ export const WorkoutHubView: React.FC<WorkoutHubViewProps> = ({
   onOpenMuscleRanks,
 }) => {
   const { isDark, colors } = useTheme();
+  const { isRTL, language, t } = useLanguage();
+
+  // Muscle Ranks
+  const [muscleRanks, setMuscleRanks] = useState<Record<string, MuscleRank>>({});
+  const [muscleRanksList, setMuscleRanksList] = useState<MuscleRank[]>([]);
+  const [selectedMuscleId, setSelectedMuscleId] = useState<MuscleType | null>(null);
+  const [isRanksModalOpen, setIsRanksModalOpen] = useState(false);
+
+  // Today's Scheduled Workout
+  const [todaysWorkoutEvent, setTodaysWorkoutEvent] = useState<CalendarEvent | null>(null);
   const [routines, setRoutines] = useState<Routine[]>([]);
+
+  // Personal Records
+  const [personalRecords, setPersonalRecords] = useState<
+    { pr: PersonalRecord; exerciseName: string }[]
+  >([]);
+  const [bestLiftsList, setBestLiftsList] = useState<BestLift[]>([]);
+  const [showAllPRs, setShowAllPRs] = useState(false);
+
+  // History
   const [pastSessions, setPastSessions] = useState<WorkoutSession[]>([]);
-  const [personalRecords, setPersonalRecords] = useState<{ pr: PersonalRecord; exerciseName: string }[]>([]);
-  const [featuredExercises, setFeaturedExercises] = useState<{
-    id: string;
-    name: string;
-    targetSets: number;
-    currentWeight: number;
-    currentReps: number;
-    lastPerformance: string;
-  }[]>([
-    {
-      id: 'ex_bench',
-      name: 'بنش برس مستوي بالبار (Bench Press)',
-      targetSets: 3,
-      currentWeight: 80,
-      currentReps: 8,
-      lastPerformance: '77.5 kg × 8',
-    },
-    {
-      id: 'ex_squat',
-      name: 'سكوات حر بالبار (Barbell Squat)',
-      targetSets: 4,
-      currentWeight: 100,
-      currentReps: 6,
-      lastPerformance: '95 kg × 6',
-    },
-    {
-      id: 'ex_deadlift',
-      name: 'ديدلفت تقليدي (Deadlift)',
-      targetSets: 3,
-      currentWeight: 120,
-      currentReps: 5,
-      lastPerformance: '115 kg × 5',
-    },
-  ]);
+  const [showAllHistory, setShowAllHistory] = useState(false);
+
+  // Create Workout Plan Modal
+  const [isCreatePlanOpen, setIsCreatePlanOpen] = useState(false);
+
+  // Load all data
+  const loadData = async () => {
+    try {
+      // 1. Muscle Ranks & Lifts
+      const storedLifts = await db.best_lifts.toArray();
+      const liftsMap: Record<string, BestLift> = {};
+      storedLifts.forEach((l) => {
+        liftsMap[l.muscle_id] = l;
+      });
+      setBestLiftsList(storedLifts);
+
+      const completedSessions = await db.workout_sessions
+        .where('is_completed')
+        .equals(1)
+        .toArray();
+
+      const computed = computeMuscleRanksFromLifts(
+        userProfile,
+        liftsMap,
+        completedSessions
+      );
+      setMuscleRanksList(computed);
+
+      const mapObj: Record<string, MuscleRank> = {};
+      computed.forEach((m) => {
+        mapObj[m.muscle_id] = m;
+      });
+      setMuscleRanks(mapObj);
+
+      // 2. Today's Workout from Calendar
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${y}-${m}-${d}`;
+
+      const todaysEvents = await db.calendar_events
+        .where('date')
+        .equals(todayStr)
+        .toArray();
+      const workoutEvent = todaysEvents.find((e) => e.is_workout || e.category === 'workout');
+      setTodaysWorkoutEvent(workoutEvent || null);
+
+      // 3. Routines
+      const allRoutines = await db.routines.toArray();
+      setRoutines(allRoutines);
+
+      // 4. PRs
+      const prs = await db.personal_records.toArray();
+      const exercises = await db.exercises.toArray();
+      const exMap = new Map(exercises.map((e) => [e.id, e.name]));
+
+      const prData = prs.map((pr) => ({
+        pr,
+        exerciseName: exMap.get(pr.exercise_id) || 'تمرين عام',
+      }));
+      setPersonalRecords(prData);
+
+      // 5. Past Sessions History
+      const sessions = await db.workout_sessions
+        .where('is_completed')
+        .equals(1)
+        .reverse()
+        .toArray();
+      setPastSessions(sessions);
+    } catch (err) {
+      console.error('Failed to load training view data:', err);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const allRoutines = await db.routines.toArray();
-        const allSessions = await db.workout_sessions
-          .where('is_completed')
-          .equals(1)
-          .reverse()
-          .limit(5)
-          .toArray();
+    loadData();
 
-        // Load personal records
-        const prs = await db.personal_records.limit(4).toArray();
-        const exercises = await db.exercises.toArray();
-        const exMap = new Map(exercises.map((e) => [e.id, e.name]));
+    const handleUpdate = () => loadData();
+    window.addEventListener('azm-routines-updated', handleUpdate);
+    window.addEventListener('azm-ranks-updated', handleUpdate);
+    window.addEventListener('azm-calendar-updated', handleUpdate);
+    window.addEventListener('azm-workout-updated', handleUpdate);
 
-        const prData = prs.map((pr) => ({
-          pr,
-          exerciseName: exMap.get(pr.exercise_id) || 'تمرين عام',
-        }));
-
-        setRoutines(allRoutines);
-        setPastSessions(allSessions);
-        setPersonalRecords(prData);
-      } catch (err) {
-        console.error('Error loading workout hub:', err);
-      }
+    return () => {
+      window.removeEventListener('azm-routines-updated', handleUpdate);
+      window.removeEventListener('azm-ranks-updated', handleUpdate);
+      window.removeEventListener('azm-calendar-updated', handleUpdate);
+      window.removeEventListener('azm-workout-updated', handleUpdate);
     };
-    load();
-  }, []);
+  }, [userProfile]);
+
+  // Handle launching today's workout
+  const handleStartTodayWorkout = () => {
+    if (todaysWorkoutEvent) {
+      // Find matching routine by title
+      const matched = routines.find(
+        (r) =>
+          todaysWorkoutEvent.title.includes(r.title) ||
+          r.title.includes(todaysWorkoutEvent.title.replace('تمرين:', '').trim())
+      );
+      if (matched) {
+        onStartRoutine(matched);
+        return;
+      }
+    }
+
+    if (routines.length > 0) {
+      onStartRoutine(routines[0]);
+    } else {
+      onStartQuickWorkout();
+    }
+  };
+
+  const rankedCount = muscleRanksList.filter(
+    (m) => !m.is_unranked && m.rank !== 'UNRANKED'
+  ).length;
 
   return (
     <div
       id="azm-workout-hub-view"
-      className="p-4 sm:p-6 max-w-xl mx-auto space-y-7 pb-28 text-right select-none transition-colors duration-200"
+      className="p-4 sm:p-6 max-w-xl mx-auto space-y-7 pb-28 select-none transition-colors duration-200"
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* 1. Header */}
       <div className="space-y-1">
         <span
           className="text-xs font-semibold uppercase tracking-wider block"
-          style={{ color: colors.textMuted }}
+          style={{ color: colors.accent }}
         >
-          صالة التدريب • Gym Experience
+          {language === 'ar' ? 'مركز التدريب والتطور' : 'Training & Progression'}
         </span>
         <h1
-          className="text-2xl sm:text-3xl font-bold tracking-tight"
+          className="text-2xl sm:text-3xl font-black tracking-tight"
           style={{ color: colors.textPrimary }}
         >
-          تمارين المقاومة والأوزان
+          {t('workout.title')}
         </h1>
+        <p className="text-xs" style={{ color: colors.textSecondary }}>
+          {t('workout.subtitle')}
+        </p>
       </div>
 
-      {/* 2. Today's Workout Hero Card */}
+      {/* ==========================================================
+          SECTION 1: RANKED BODY MAP (الرتب العضلية)
+          ========================================================== */}
       <div
-        className="p-5 rounded-2xl border space-y-4 transition-colors duration-200"
+        className="rounded-3xl border p-4 sm:p-5 space-y-3.5 shadow-xs transition-colors"
+        style={{
+          backgroundColor: colors.card,
+          borderColor: colors.border,
+        }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center border"
+              style={{
+                backgroundColor: isDark ? 'rgba(234, 179, 8, 0.15)' : 'rgba(234, 179, 8, 0.1)',
+                borderColor: isDark ? 'rgba(234, 179, 8, 0.3)' : 'rgba(234, 179, 8, 0.2)',
+                color: '#EAB308',
+              }}
+            >
+              <Shield className="w-4 h-4" />
+            </div>
+            <div>
+              <h2
+                id="workout-hub-muscle-rank-title"
+                className="text-sm sm:text-base font-black tracking-tight"
+                style={{ color: colors.textPrimary }}
+              >
+                {t('workout.muscle_rank')}
+              </h2>
+              <span className="text-[11px]" style={{ color: colors.textSecondary }}>
+                {language === 'ar'
+                  ? `${rankedCount} من ${muscleRanksList.length} عضلات مصنفة حتى الآن`
+                  : `${rankedCount} of ${muscleRanksList.length} muscles ranked`}
+              </span>
+            </div>
+          </div>
+
+          <button
+            id="workout-hub-view-details-btn"
+            onClick={() => {
+              if (onOpenMuscleRanks) onOpenMuscleRanks();
+              else setIsRanksModalOpen(true);
+            }}
+            className="text-xs font-bold flex items-center gap-1 transition-opacity hover:opacity-80"
+            style={{ color: colors.accent }}
+          >
+            <span>{t('workout.view_details')}</span>
+            <ChevronLeft className={`w-4 h-4 ${!isRTL ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+
+        {/* Anatomical Interactive Map */}
+        <div className="pt-1">
+          <MuscleBodyMap
+            muscleRanks={muscleRanks}
+            selectedMuscleId={selectedMuscleId}
+            onSelectMuscle={(id) => {
+              setSelectedMuscleId(id);
+              if (onOpenMuscleRanks) onOpenMuscleRanks();
+              else setIsRanksModalOpen(true);
+            }}
+          />
+        </div>
+
+        {/* SECTION 2: [عرض الرتب العضلية] Button directly underneath map */}
+        <button
+          id="workout-hub-view-ranks-btn"
+          onClick={() => {
+            if (onOpenMuscleRanks) onOpenMuscleRanks();
+            else setIsRanksModalOpen(true);
+          }}
+          className="w-full py-3 px-4 rounded-2xl border font-black text-xs transition-all active:scale-[0.99] flex items-center justify-center gap-2 shadow-xs hover:opacity-90"
+          style={{
+            borderColor: colors.accent,
+            color: colors.accent,
+            backgroundColor: isDark ? '#18181C' : '#FFFFFF',
+          }}
+        >
+          <Shield className="w-4 h-4" />
+          <span>{t('workout.view_ranks_btn')}</span>
+          <ChevronLeft className={`w-4 h-4 ${!isRTL ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
+
+      {/* ==========================================================
+          SECTION 3: TODAY'S TRAINING SECTION
+          ========================================================== */}
+      <div
+        className="rounded-3xl border p-5 space-y-4 shadow-xs transition-colors"
         style={{
           backgroundColor: colors.card,
           borderColor: colors.border,
         }}
       >
         <div className="flex items-start justify-between">
-          <div>
-            <span
-              className="text-xs font-mono font-bold uppercase tracking-wider block"
-              style={{ color: colors.accent }}
-            >
-              التدريب الموصى به اليوم
-            </span>
-            <h2
-              className="text-lg sm:text-xl font-bold tracking-tight mt-0.5"
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
+                style={{
+                  backgroundColor: todaysWorkoutEvent
+                    ? 'rgba(52, 199, 89, 0.15)'
+                    : isDark
+                    ? '#1E1E22'
+                    : '#EEF2F6',
+                  color: todaysWorkoutEvent ? '#34C759' : colors.textMuted,
+                }}
+              >
+                {todaysWorkoutEvent
+                  ? (language === 'ar' ? 'مجدول اليوم ✓' : 'Scheduled Today ✓')
+                  : (language === 'ar' ? 'راحة أو تمرين حر' : 'Rest or Open')}
+              </span>
+              <span className="text-xs font-bold" style={{ color: colors.textSecondary }}>
+                {t('workout.today_session')}
+              </span>
+            </div>
+
+            <h3
+              className="text-lg sm:text-xl font-black tracking-tight pt-1"
               style={{ color: colors.textPrimary }}
             >
-              {routines[0]?.title || 'تمرين الدفع (Push Day)'}
-            </h2>
-            <p
-              className="text-xs mt-1"
-              style={{ color: colors.textSecondary }}
-            >
-              {routines[0]?.description || 'التركيز على الصدر، الأكتاف الأمامية والجانبية، والترايسبس.'}
+              {todaysWorkoutEvent
+                ? todaysWorkoutEvent.title.replace('تمرين:', '').trim()
+                : routines[0]?.title || (language === 'ar' ? 'لا يوجد تمرين مجدول اليوم' : 'No workout scheduled today')}
+            </h3>
+
+            <p className="text-xs leading-relaxed" style={{ color: colors.textSecondary }}>
+              {todaysWorkoutEvent
+                ? todaysWorkoutEvent.notes || (language === 'ar' ? 'جلسة تدريبية مخصصة من جدولك التدريبي.' : 'Scheduled session from your plan.')
+                : (language === 'ar'
+                  ? 'يمكنك أخذ يوم راحة استشفائي، بدء تمرين حر فوري، أو إنشاء جدولك الأسبوعي.'
+                  : 'Take a rest day, launch a quick workout, or build your custom weekly split.')}
             </p>
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons for Today's Training */}
         <div className="grid grid-cols-2 gap-2.5 pt-1">
           <button
-            onClick={() => {
-              if (routines[0]) onStartRoutine(routines[0]);
-              else onStartQuickWorkout();
-            }}
-            className="py-3 px-4 rounded-xl text-xs sm:text-sm font-bold text-white transition-opacity flex items-center justify-center gap-2 active:scale-98 shadow-xs"
+            id="workout-hub-start-today-btn"
+            onClick={handleStartTodayWorkout}
+            className="py-3.5 px-4 rounded-2xl text-xs sm:text-sm font-black text-white transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-md hover:opacity-90"
             style={{ backgroundColor: colors.accent }}
           >
             <Play className="w-4 h-4 fill-current" />
-            <span>ابدأ التدريب</span>
+            <span>{t('workout.start_today')}</span>
           </button>
 
           <button
+            id="workout-hub-quick-workout-btn"
             onClick={onStartQuickWorkout}
-            className="py-3 px-4 rounded-xl text-xs sm:text-sm font-bold border transition-colors flex items-center justify-center gap-2 active:scale-98"
+            className="py-3.5 px-4 rounded-2xl text-xs sm:text-sm font-bold border transition active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-80"
             style={{
               borderColor: colors.border,
               color: colors.textPrimary,
-              backgroundColor: isDark ? '#1D1D20' : '#F0F4F4',
+              backgroundColor: isDark ? '#18181C' : '#F4F7F7',
             }}
           >
             <Dumbbell className="w-4 h-4" />
-            <span>تمرين حر سريع</span>
+            <span>{t('workout.quick_workout')}</span>
           </button>
         </div>
+
+        {/* [إنشاء جدول تدريبي] Button clearly visible under training information */}
+        <button
+          id="workout-hub-create-schedule-btn"
+          onClick={() => setIsCreatePlanOpen(true)}
+          className="w-full py-3 px-4 rounded-2xl border border-dashed text-xs font-black transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
+          style={{
+            borderColor: colors.border,
+            color: colors.textPrimary,
+            backgroundColor: isDark ? '#141417' : '#F8FAFA',
+          }}
+        >
+          <Plus className="w-4 h-4" style={{ color: colors.accent }} />
+          <span>{t('workout.create_schedule_btn')}</span>
+        </button>
       </div>
 
-      {/* 3. Muscle Rankings & Progression Banner */}
-      <div
-        onClick={onOpenMuscleRanks}
-        className="p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-colors duration-200 hover:opacity-90 active:scale-99"
-        style={{
-          backgroundColor: colors.card,
-          borderColor: colors.border,
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl border flex items-center justify-center"
-            style={{
-              backgroundColor: isDark ? '#1D1D20' : '#F0F4F4',
-              borderColor: colors.border,
-              color: colors.accent,
-            }}
-          >
-            <Shield className="w-5 h-5 stroke-[2]" />
-          </div>
-          <div>
+      {/* ==========================================================
+          SECTION 4: PRs (الأرقام القياسية الشخصية)
+          ========================================================== */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-4 h-4" style={{ color: colors.accent }} />
             <h3
-              className="text-sm font-bold"
+              id="workout-hub-prs-title"
+              className="text-xs font-bold uppercase tracking-wider"
               style={{ color: colors.textPrimary }}
             >
-              خريطة رتب العضلات (Liftoff)
+              {t('workout.prs_title')}
             </h3>
-            <p
-              className="text-xs"
-              style={{ color: colors.textSecondary }}
-            >
-              كل عضلة تبدأ بدون رتبة (UNRANKED) وترتقي بعد تسجيل أفضل رفعة.
-            </p>
           </div>
-        </div>
 
-        <ChevronLeft
-          className="w-4 h-4 flex-shrink-0"
-          style={{ color: colors.textMuted }}
-        />
-      </div>
-
-      {/* 4. Compact & Information-Dense Exercise Tracking Cards */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between px-1">
-          <h2
-            className="text-xs font-semibold uppercase tracking-wider"
-            style={{ color: colors.textMuted }}
-          >
-            التمارين المستهدفة • Exercise Tracking
-          </h2>
-          <span
-            className="text-xs font-mono font-medium"
-            style={{ color: colors.textSecondary }}
-          >
-            أوزان وتكرارات
-          </span>
-        </div>
-
-        <div className="space-y-2">
-          {featuredExercises.map((ex) => (
-            <div
-              key={ex.id}
-              className="p-4 rounded-2xl border transition-colors duration-200 space-y-2.5"
-              style={{
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-              }}
+          {(personalRecords.length > 2 || bestLiftsList.length > 2) && (
+            <button
+              onClick={() => setShowAllPRs(!showAllPRs)}
+              className="text-xs font-bold transition-opacity hover:opacity-80"
+              style={{ color: colors.accent }}
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4
-                    className="text-sm font-bold tracking-tight"
-                    style={{ color: colors.textPrimary }}
-                  >
-                    {ex.name}
-                  </h4>
-                  <div className="flex items-center gap-2 mt-1 text-xs">
+              {showAllPRs ? (language === 'ar' ? 'إخفاء' : 'Hide') : (language === 'ar' ? 'عرض الكل' : 'View All')}
+            </button>
+          )}
+        </div>
+
+        {bestLiftsList.length > 0 || personalRecords.length > 0 ? (
+          <div className="grid grid-cols-2 gap-2.5">
+            {(showAllPRs ? bestLiftsList : bestLiftsList.slice(0, 4)).map((lift) => {
+              const tier = getTierConfig(lift.rank);
+              return (
+                <div
+                  key={lift.id}
+                  className="p-3.5 rounded-2xl border transition-all space-y-1.5"
+                  style={{
+                    backgroundColor: colors.card,
+                    borderColor: colors.border,
+                  }}
+                >
+                  <div className="flex items-center justify-between">
                     <span
-                      className="font-mono font-bold"
-                      style={{ color: colors.accent }}
+                      className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border"
+                      style={{
+                        backgroundColor: tier.badgeBg,
+                        borderColor: tier.badgeBorder,
+                        color: tier.badgeText,
+                      }}
                     >
-                      {ex.currentWeight} kg × {ex.currentReps}
+                      {language === 'ar' ? tier.title_ar : tier.title_en}
                     </span>
-                    <span style={{ color: colors.textMuted }}>•</span>
-                    <span style={{ color: colors.textSecondary }}>
-                      {ex.targetSets} مجموعات
+                    <span className="text-[10px] font-mono" style={{ color: colors.textMuted }}>
+                      {language === 'ar' ? `تقدير: ${lift.estimated_1rm} كجم` : `1RM: ${lift.estimated_1rm} kg`}
+                    </span>
+                  </div>
+
+                  <div className="text-xs font-bold line-clamp-1" style={{ color: colors.textPrimary }}>
+                    {lift.exercise_name}
+                  </div>
+
+                  <div className="flex items-baseline gap-1 font-mono">
+                    <span className="text-base sm:text-lg font-black" style={{ color: colors.textPrimary }}>
+                      {lift.weight_kg}
+                    </span>
+                    <span className="text-[10px]" style={{ color: colors.textMuted }}>
+                      {language === 'ar' ? `كجم × ${lift.reps}` : `kg × ${lift.reps}`}
                     </span>
                   </div>
                 </div>
-
-                <button
-                  onClick={onStartQuickWorkout}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all active:scale-95 flex items-center gap-1"
-                  style={{
-                    borderColor: colors.border,
-                    color: colors.textPrimary,
-                    backgroundColor: isDark ? '#1D1D20' : '#F0F4F4',
-                  }}
-                >
-                  <Plus className="w-3.5 h-3.5" style={{ color: colors.accent }} />
-                  <span>+ إضافة جولة</span>
-                </button>
-              </div>
-
-              {/* Performance Comparison Row */}
-              <div
-                className="pt-2 border-t flex items-center justify-between text-xs"
-                style={{ borderColor: colors.border }}
-              >
-                <span style={{ color: colors.textMuted }}>
-                  آخر أداء مسجل:
-                </span>
-                <span
-                  className="font-mono font-semibold"
-                  style={{ color: colors.textSecondary }}
-                >
-                  {ex.lastPerformance}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 5. Personal Records (PRs) */}
-      <div className="space-y-2.5">
-        <h2
-          className="text-xs font-semibold uppercase tracking-wider px-1"
-          style={{ color: colors.textMuted }}
-        >
-          الأرقام القياسية • Personal Records
-        </h2>
-
-        {personalRecords.length > 0 ? (
-          <div className="grid grid-cols-2 gap-2.5">
-            {personalRecords.map(({ pr, exerciseName }) => (
-              <div
-                key={pr.id}
-                className="p-3.5 rounded-2xl border transition-colors"
-                style={{
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                }}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <Trophy
-                    className="w-4 h-4"
-                    style={{ color: colors.accent }}
-                  />
-                  <span
-                    className="text-[10px] font-mono font-bold"
-                    style={{ color: colors.accent }}
-                  >
-                    PR
-                  </span>
-                </div>
-                <div
-                  className="text-xs font-bold line-clamp-1"
-                  style={{ color: colors.textPrimary }}
-                >
-                  {exerciseName}
-                </div>
-                <div className="mt-1 flex items-baseline gap-1">
-                  <span
-                    className="text-lg font-black font-mono"
-                    style={{ color: colors.textPrimary }}
-                  >
-                    {pr.weight_kg}
-                  </span>
-                  <span
-                    className="text-[10px] font-semibold"
-                    style={{ color: colors.textMuted }}
-                  >
-                    كجم × {pr.reps}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div
@@ -366,58 +480,81 @@ export const WorkoutHubView: React.FC<WorkoutHubViewProps> = ({
               color: colors.textSecondary,
             }}
           >
-            سجل تمارينك باستمرار لتحطيم وحفظ أرقامك القياسية هنا تلقائياً.
+            {language === 'ar'
+              ? 'لم تسجل أي رفعة قياسية بعد. سجل أفضل رفعة لك في خريطة الرتب لتظهر أرقامك هنا.'
+              : 'No personal records logged yet. Log your best lifts to display them here.'}
           </div>
         )}
       </div>
 
-      {/* 6. Workout History */}
-      <div className="space-y-2.5">
-        <h2
-          className="text-xs font-semibold uppercase tracking-wider px-1"
-          style={{ color: colors.textMuted }}
-        >
-          سجل التمارين السابقة • Workout History
-        </h2>
+      {/* ==========================================================
+          SECTION 5: WORKOUT HISTORY (سجل التمارين)
+          ========================================================== */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4" style={{ color: colors.textSecondary }} />
+            <h3
+              id="workout-hub-history-title"
+              className="text-xs font-bold uppercase tracking-wider"
+              style={{ color: colors.textPrimary }}
+            >
+              {t('workout.history_title')}
+            </h3>
+          </div>
+
+          {pastSessions.length > 3 && (
+            <button
+              onClick={() => setShowAllHistory(!showAllHistory)}
+              className="text-xs font-bold transition-opacity hover:opacity-80"
+              style={{ color: colors.accent }}
+            >
+              {showAllHistory
+                ? (language === 'ar' ? 'إخفاء' : 'Hide')
+                : (language === 'ar' ? `عرض الكل (${pastSessions.length})` : `View All (${pastSessions.length})`)}
+            </button>
+          )}
+        </div>
 
         {pastSessions.length > 0 ? (
           <div
-            className="rounded-2xl border divide-y overflow-hidden transition-colors"
+            className="rounded-3xl border divide-y overflow-hidden transition-colors"
             style={{
               backgroundColor: colors.card,
               borderColor: colors.border,
             }}
           >
-            {pastSessions.map((s) => (
+            {(showAllHistory ? pastSessions : pastSessions.slice(0, 3)).map((session) => (
               <div
-                key={s.id}
-                className="p-3.5 flex items-center justify-between text-xs"
+                key={session.id}
+                className="p-4 flex items-center justify-between text-xs transition-colors"
               >
-                <div>
+                <div className="space-y-0.5">
                   <h4
-                    className="font-bold text-sm"
+                    className="font-black text-sm tracking-tight"
                     style={{ color: colors.textPrimary }}
                   >
-                    {s.routine_title || 'تمرين مقاومة'}
+                    {session.routine_title || (language === 'ar' ? 'تمرين مقاومة' : 'Resistance Training')}
                   </h4>
-                  <span style={{ color: colors.textMuted }}>
-                    {new Date(s.started_at).toLocaleDateString('ar-EG', {
+                  <span className="text-[11px]" style={{ color: colors.textMuted }}>
+                    {new Date(session.started_at).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
                       weekday: 'long',
+                      year: 'numeric',
                       month: 'short',
                       day: 'numeric',
                     })}
                   </span>
                 </div>
 
-                <div className="text-left font-mono">
+                <div className="text-left font-mono space-y-0.5">
                   <span
-                    className="font-bold block"
+                    className="font-bold text-xs block"
                     style={{ color: colors.accent }}
                   >
-                    {s.sets?.length || 0} جولات
+                    {session.sets?.length || 0} {language === 'ar' ? 'جولات' : 'sets'}
                   </span>
-                  <span style={{ color: colors.textMuted }}>
-                    {Math.round((s.duration_seconds || 1800) / 60)} دقيقة
+                  <span className="text-[11px]" style={{ color: colors.textSecondary }}>
+                    {Math.round((session.duration_seconds || 1800) / 60)} {language === 'ar' ? 'دقيقة' : 'min'}
                   </span>
                 </div>
               </div>
@@ -432,10 +569,36 @@ export const WorkoutHubView: React.FC<WorkoutHubViewProps> = ({
               color: colors.textSecondary,
             }}
           >
-            لم تسجل أي تمرين مكتمل بعد. ابدأ أول تدريب لك اليوم!
+            {language === 'ar'
+              ? 'لم تسجل أي جلسة تمرين بعد. ابدأ أول تدريب لك اليوم!'
+              : 'No workout sessions logged yet. Start your first workout today!'}
           </div>
         )}
       </div>
+
+      {/* Create Workout Plan Modal */}
+      <CreateWorkoutPlanModal
+        isOpen={isCreatePlanOpen}
+        onClose={() => setIsCreatePlanOpen(false)}
+        onPlanCreated={() => {
+          loadData();
+        }}
+      />
+
+      {/* Full Muscle Ranks Modal if accessed directly */}
+      {isRanksModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-xs flex justify-center p-2 sm:p-4">
+          <div
+            className="w-full max-w-xl my-auto rounded-3xl border overflow-hidden shadow-2xl"
+            style={{
+              backgroundColor: colors.card,
+              borderColor: colors.border,
+            }}
+          >
+            <MuscleRanksView onClose={() => setIsRanksModalOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

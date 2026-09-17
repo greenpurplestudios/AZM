@@ -12,6 +12,10 @@ import {
   computeMuscleRanksFromLifts,
   calculateEstimated1RM,
   calculateScoreAndRank,
+  calculateNextRankRequirements,
+  getTierConfig,
+  getNextTier,
+  TIER_CONFIGS,
 } from '../utils/muscleLifts';
 import { MuscleBodyMap } from './MuscleBodyMap';
 import { useTheme } from '../context/ThemeContext';
@@ -24,13 +28,17 @@ import {
   X,
   Check,
   ChevronDown,
+  ArrowUpRight,
+  Target,
+  Zap,
 } from 'lucide-react';
 
 interface MuscleRanksViewProps {
   onSelectExerciseToTrain?: (muscleId: string) => void;
+  onClose?: () => void;
 }
 
-export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
+export const MuscleRanksView: React.FC<MuscleRanksViewProps> = ({ onClose }) => {
   const { isDark, colors } = useTheme();
   const [muscleRanks, setMuscleRanks] = useState<MuscleRank[]>([]);
   const [filterCategory, setFilterCategory] = useState<'all' | 'upper' | 'lower' | 'core'>('all');
@@ -110,7 +118,7 @@ export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
     const updatedLift: BestLift = {
       id: `lift_${editingMuscle.muscle_id}`,
       muscle_id: editingMuscle.muscle_id,
-      exercise_name: muscleDef?.defaultLiftName || 'رفعة القوة المعتمدة',
+      exercise_name: muscleDef?.defaultLiftName || 'الرفعة القياسية المعتمدة',
       input_type: 'weight_reps',
       weight_kg: liftWeight,
       reps: liftReps,
@@ -124,6 +132,7 @@ export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
     await db.best_lifts.put(updatedLift);
     setEditingMuscle(null);
     await loadData();
+    window.dispatchEvent(new CustomEvent('azm-ranks-updated'));
   };
 
   const filtered = muscleRanks.filter((m) => {
@@ -144,28 +153,39 @@ export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
   return (
     <div
       id="azm-muscle-ranks-view"
-      className="p-4 sm:p-6 max-w-xl mx-auto space-y-7 pb-28 text-right select-none transition-colors duration-200"
+      className="p-4 sm:p-6 max-w-xl mx-auto space-y-6 pb-28 text-right select-none transition-colors duration-200"
     >
       {/* 1. Header */}
-      <div className="space-y-1">
-        <span
-          className="text-xs font-semibold uppercase tracking-wider block"
-          style={{ color: colors.textMuted }}
-        >
-          نظام Liftoff • خريطة القوة
-        </span>
-        <h1
-          className="text-2xl sm:text-3xl font-bold tracking-tight"
-          style={{ color: colors.textPrimary }}
-        >
-          رتب العضلات وتطور القوة
-        </h1>
-        <p className="text-xs" style={{ color: colors.textSecondary }}>
-          جميع العضلات تبدأ بدون رتبة (UNRANKED)، وتُمنح الرتبة فور تسجيل أفضل رفعة لك.
-        </p>
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <span
+            className="text-xs font-semibold uppercase tracking-wider block"
+            style={{ color: colors.accent }}
+          >
+            الرتبة العضلي • Muscle Ranking System
+          </span>
+          <h1
+            className="text-2xl sm:text-3xl font-bold tracking-tight"
+            style={{ color: colors.textPrimary }}
+          >
+            خريطة الرتب وتطور القوة
+          </h1>
+          <p className="text-xs" style={{ color: colors.textSecondary }}>
+            تتبع تطور كل عضلة من برونزي إلى توب 50 عبر أرقامك القياسية المعتمدة.
+          </p>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl border hover:opacity-80 transition-opacity"
+            style={{ borderColor: colors.border, color: colors.textSecondary }}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
-      {/* 2. Anatomical Body Map */}
+      {/* 2. Ranked Body Map */}
       <MuscleBodyMap
         muscleRanks={muscleRanksMap}
         selectedMuscleId={selectedMuscleId}
@@ -189,15 +209,16 @@ export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
             <button
               key={cat.id}
               onClick={() => setFilterCategory(cat.id as any)}
-              className="px-3 py-1.5 rounded-lg border font-medium whitespace-nowrap transition-all"
+              className="px-3.5 py-1.5 rounded-xl border font-bold whitespace-nowrap transition-all"
               style={{
                 backgroundColor: isSelected
                   ? isDark
-                    ? '#1D1D20'
+                    ? '#1E1E22'
                     : '#FFFFFF'
                   : 'transparent',
                 borderColor: isSelected ? colors.accent : colors.border,
                 color: isSelected ? colors.accent : colors.textSecondary,
+                boxShadow: isSelected ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
               }}
             >
               {cat.label}
@@ -206,76 +227,134 @@ export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
         })}
       </div>
 
-      {/* 4. Muscle List Cards */}
-      <div className="space-y-2">
+      {/* 4. Muscle List Cards with Next Rank Requirements */}
+      <div className="space-y-3">
         {filtered.map((muscle) => {
           const isUnranked = muscle.is_unranked || muscle.rank === 'UNRANKED';
           const lift = bestLifts[muscle.muscle_id];
+          const tierConfig = getTierConfig(muscle.rank);
+          const nextReq = lift
+            ? calculateNextRankRequirements({
+                muscleId: muscle.muscle_id,
+                currentE1RM: lift.estimated_1rm,
+                bodyweightKg: userProfile?.weight_kg || 75,
+                currentReps: lift.reps || 8,
+              })
+            : null;
 
           return (
             <div
               key={muscle.muscle_id}
-              className="p-4 rounded-2xl border transition-all duration-150 flex items-center justify-between"
+              className="p-4 rounded-2xl border transition-all duration-150 space-y-3"
               style={{
                 backgroundColor: colors.card,
                 borderColor: selectedMuscleId === muscle.muscle_id ? colors.accent : colors.border,
               }}
             >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h4
-                    className="text-sm font-bold tracking-tight"
-                    style={{ color: colors.textPrimary }}
-                  >
-                    {muscle.muscle_name}
-                  </h4>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
                   <span
-                    className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border"
-                    style={{
-                      backgroundColor: isUnranked
-                        ? isDark ? '#111113' : '#F0F4F4'
-                        : isDark ? '#2D1B1E' : '#E6F9F6',
-                      borderColor: isUnranked ? colors.border : colors.accent,
-                      color: isUnranked ? colors.textMuted : colors.accent,
-                    }}
-                  >
-                    {isUnranked ? 'UNRANKED' : `رتبة ${muscle.rank}`}
-                  </span>
+                    className="w-3.5 h-3.5 rounded-full shrink-0"
+                    style={{ backgroundColor: tierConfig.color }}
+                  />
+                  <div>
+                    <h4
+                      className="text-sm font-bold tracking-tight"
+                      style={{ color: colors.textPrimary }}
+                    >
+                      {muscle.muscle_name}
+                    </h4>
+                    <span className="text-[11px]" style={{ color: colors.textMuted }}>
+                      {muscle.muscle_name_en}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="text-xs" style={{ color: colors.textSecondary }}>
-                  {lift ? (
-                    <span className="font-mono">
-                      أفضل رفعة: {lift.weight_kg} كجم × {lift.reps} تكرار (1RM تقريبي: {lift.estimated_1rm} كجم)
-                    </span>
-                  ) : (
-                    <span>لم يتم إدخال رفعة قياسية بعد</span>
-                  )}
+                <div className="flex items-center gap-2">
+                  <span
+                    className="text-xs font-bold px-2.5 py-1 rounded-lg border font-mono"
+                    style={{
+                      backgroundColor: tierConfig.badgeBg,
+                      borderColor: tierConfig.badgeBorder,
+                      color: tierConfig.badgeText,
+                    }}
+                  >
+                    {isUnranked ? 'غير مصنف' : tierConfig.title_ar}
+                  </span>
+
+                  <button
+                    onClick={() => openLogModal(muscle)}
+                    className="p-1.5 rounded-lg border hover:opacity-80 transition-all active:scale-95"
+                    style={{
+                      borderColor: colors.border,
+                      color: colors.textPrimary,
+                      backgroundColor: isDark ? '#1C1C20' : '#FFFFFF',
+                    }}
+                    title="تعديل الرفعة"
+                  >
+                    {isUnranked ? (
+                      <Plus className="w-4 h-4" style={{ color: colors.accent }} />
+                    ) : (
+                      <Edit2 className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
-              {/* Action Button */}
-              <button
-                onClick={() => openLogModal(muscle)}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1 transition-all active:scale-95"
+              {/* Current Best Lift & Stats */}
+              <div
+                className="p-2.5 rounded-xl border text-xs flex items-center justify-between font-mono"
                 style={{
-                  borderColor: isUnranked ? colors.border : colors.accent,
-                  color: isUnranked ? colors.textPrimary : colors.accent,
-                  backgroundColor: isDark ? '#171719' : '#FFFFFF',
+                  backgroundColor: isDark ? '#111113' : '#F8FAFA',
+                  borderColor: colors.border,
                 }}
               >
-                {isUnranked ? (
-                  <>
-                    <Plus className="w-3.5 h-3.5" style={{ color: colors.accent }} />
-                    <span>تسجيل رفعة</span>
-                  </>
-                ) : (
-                  <>
-                    <Edit2 className="w-3.5 h-3.5" />
-                    <span>تعديل</span>
-                  </>
+                <div style={{ color: colors.textSecondary }}>
+                  {lift ? (
+                    <span>
+                      أفضل أداء: <strong style={{ color: colors.textPrimary }}>{lift.weight_kg} كجم × {lift.reps}</strong>
+                    </span>
+                  ) : (
+                    <span style={{ color: colors.textMuted }}>لم تسجل رفعة قياسية بعد</span>
+                  )}
+                </div>
+                {lift && (
+                  <div className="font-bold" style={{ color: colors.accent }}>
+                    1RM تقريبي: {lift.estimated_1rm} كجم
+                  </div>
                 )}
-              </button>
+              </div>
+
+              {/* Next Rank Progression Target */}
+              {nextReq && nextReq.nextTier && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span style={{ color: colors.textSecondary }}>
+                      الرتبة التالية:{' '}
+                      <strong style={{ color: nextReq.nextTier.color }}>
+                        {nextReq.nextTier.title_ar}
+                      </strong>
+                    </span>
+                    <span className="font-mono font-bold" style={{ color: colors.accent }}>
+                      باقي {nextReq.remainingKg} كجم
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div
+                    className="w-full h-2 rounded-full overflow-hidden"
+                    style={{ backgroundColor: isDark ? '#242428' : '#E2E8F0' }}
+                  >
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(100, Math.max(8, nextReq.progressPct))}%`,
+                        backgroundColor: nextReq.nextTier.color,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -283,9 +362,9 @@ export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
 
       {/* 5. Best Lift Input Modal */}
       {editingMuscle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
           <div
-            className="w-full max-w-sm rounded-2xl border p-5 space-y-4 text-right select-none shadow-xl"
+            className="w-full max-w-sm rounded-2xl border p-5 space-y-4 text-right select-none shadow-2xl"
             style={{
               backgroundColor: colors.card,
               borderColor: colors.border,
@@ -297,7 +376,7 @@ export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
                   className="text-xs font-mono font-bold uppercase tracking-wider block"
                   style={{ color: colors.accent }}
                 >
-                  تسجيل الرفعة القياسية
+                  الرتبة العضلي • تسجيل الرفعة
                 </span>
                 <h3
                   className="text-lg font-bold"
@@ -318,7 +397,7 @@ export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
             <form onSubmit={handleSaveBestLift} className="space-y-4">
               <div className="space-y-1.5">
                 <label
-                  className="text-xs font-medium"
+                  className="text-xs font-semibold"
                   style={{ color: colors.textSecondary }}
                 >
                   أعلى وزن رفعته (كجم):
@@ -342,7 +421,7 @@ export const MuscleRanksView: React.FC<MuscleRanksViewProps> = () => {
 
               <div className="space-y-1.5">
                 <label
-                  className="text-xs font-medium"
+                  className="text-xs font-semibold"
                   style={{ color: colors.textSecondary }}
                 >
                   عدد التكرارات النظيفة بهذا الوزن:

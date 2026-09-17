@@ -56,7 +56,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'pullup_bar',
         exercise_id: 'ex_chest_dips',
-        name_ar: 'المتوازي للصدر (Dips)',
+        name_ar: 'المتوازي للصدر',
         name_en: 'Chest Dips',
         inputType: 'bodyweight_plus_weight',
         unitLabel: 'تكرار / وزن إضافي',
@@ -72,7 +72,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'bodyweight',
         exercise_id: 'ex_pushups',
-        name_ar: 'تمرين الضغط (Push-ups)',
+        name_ar: 'تمرين الضغط الكلاسيكي',
         name_en: 'Push-ups',
         inputType: 'bodyweight_reps',
         unitLabel: 'أقصى تكرارات متتالية',
@@ -84,14 +84,14 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
     name_ar: 'الظهر',
     name_en: 'Back',
     category: 'upper',
-    description: 'اللاتس، المجنص، ومنتصف وأعلى الظهر',
-    defaultLiftName: 'الرفعة الميتة (ديدليفت)',
+    description: 'عضلات الظهر العريض ومنتصف وأعلى الظهر والقطنية',
+    defaultLiftName: 'الرفعة الميتة بالبار',
     defaultLiftNameEn: 'Deadlift / Pull-ups',
     equipmentLifts: [
       {
         equipment: 'barbell',
         exercise_id: 'ex_deadlift',
-        name_ar: 'الرفعة الميتة (ديدليفت)',
+        name_ar: 'الرفعة الميتة بالبار',
         name_en: 'Barbell Deadlift',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -99,7 +99,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'pullup_bar',
         exercise_id: 'ex_pullups',
-        name_ar: 'العقلة (Pull-ups)',
+        name_ar: 'العقلة بوزن الجسم',
         name_en: 'Pull-ups',
         inputType: 'bodyweight_plus_weight',
         unitLabel: 'تكرار / وزن إضافي',
@@ -115,7 +115,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'dumbbells',
         exercise_id: 'ex_db_row',
-        name_ar: 'سحب منشار بالدامبل (DB Row)',
+        name_ar: 'سحب منشار بالدامبل',
         name_en: 'Dumbbell Row',
         inputType: 'weight_reps',
         unitLabel: 'كغ للدامبل',
@@ -123,7 +123,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'machines',
         exercise_id: 'ex_lat_pulldown',
-        name_ar: 'سحب علوي عريض (Lat Pulldown)',
+        name_ar: 'سحب علوي عريض بالكيبل',
         name_en: 'Lat Pulldown',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -136,7 +136,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
     name_en: 'Shoulders',
     category: 'upper',
     description: 'الدالية الأمامية والجانبية والخلفية',
-    defaultLiftName: 'ضغط أكتاف عسكري بالبار (OHP)',
+    defaultLiftName: 'ضغط أكتاف عسكري بالبار',
     defaultLiftNameEn: 'Overhead Press',
     equipmentLifts: [
       {
@@ -166,7 +166,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'bodyweight',
         exercise_id: 'ex_pike_pushup',
-        name_ar: 'تمرين البايك بوش اب (Pike Push-ups)',
+        name_ar: 'ضغط البايك المرتفع للأكتاف',
         name_en: 'Pike Push-ups',
         inputType: 'bodyweight_reps',
         unitLabel: 'أقصى تكرارات',
@@ -201,7 +201,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'pullup_bar',
         exercise_id: 'ex_chinups',
-        name_ar: 'العقلة بقبضة معكوسة (Chin-ups)',
+        name_ar: 'العقلة بقبضة معكوسة',
         name_en: 'Chin-ups',
         inputType: 'bodyweight_plus_weight',
         unitLabel: 'تكرارات / وزن إضافي',
@@ -236,7 +236,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'barbell',
         exercise_id: 'ex_skull_crusher',
-        name_ar: 'كسارة الجمجمة بالبار (Skull Crusher)',
+        name_ar: 'مد ترايسبس بالبار الزجزاج',
         name_en: 'Skull Crusher',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -252,7 +252,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'bodyweight',
         exercise_id: 'ex_diamond_pushups',
-        name_ar: 'ضغط الماس (Diamond Push-ups)',
+        name_ar: 'تمرين الضغط الماسي',
         name_en: 'Diamond Push-ups',
         inputType: 'bodyweight_reps',
         unitLabel: 'أقصى تكرارات',
@@ -271,7 +271,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'barbell',
         exercise_id: 'ex_barbell_squat',
-        name_ar: 'سكوات خلفي بالبار (Back Squat)',
+        name_ar: 'سكوات خلفي بالبار',
         name_en: 'Barbell Back Squat',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -279,7 +279,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'machines',
         exercise_id: 'ex_leg_press',
-        name_ar: 'دفع الأرجل بالجهاز (Leg Press)',
+        name_ar: 'دفع الأرجل بالجهاز',
         name_en: 'Leg Press Machine',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -287,7 +287,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'dumbbells',
         exercise_id: 'ex_goblet_squat',
-        name_ar: 'سكوات غوبلت بالدامبل (Goblet Squat)',
+        name_ar: 'سكوات كأسي بالدامبل',
         name_en: 'Goblet Squat',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -295,7 +295,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'bodyweight',
         exercise_id: 'ex_bodyweight_squat',
-        name_ar: 'سكوات وزن الجسم (أقصى تكرار)',
+        name_ar: 'سكوات حر بوزن الجسم',
         name_en: 'Bodyweight Squats',
         inputType: 'bodyweight_reps',
         unitLabel: 'تكرار متتالي',
@@ -308,13 +308,13 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
     name_en: 'Hamstrings',
     category: 'lower',
     description: 'أوتار الركبة والعضلات الخلفية للفخذ',
-    defaultLiftName: 'ديدليفت روماني (RDL)',
+    defaultLiftName: 'الرفعة الرومانية بالبار',
     defaultLiftNameEn: 'Romanian Deadlift (RDL)',
     equipmentLifts: [
       {
         equipment: 'barbell',
         exercise_id: 'ex_romanian_deadlift',
-        name_ar: 'ديدليفت روماني بالبار (RDL)',
+        name_ar: 'الرفعة الرومانية بالبار',
         name_en: 'Barbell Romanian Deadlift',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -322,7 +322,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'dumbbells',
         exercise_id: 'ex_db_rdl',
-        name_ar: 'ديدليفت روماني بالدامبلز (DB RDL)',
+        name_ar: 'الرفعة الرومانية بالدامبلز',
         name_en: 'Dumbbell RDL',
         inputType: 'weight_reps',
         unitLabel: 'كغ للدامبل الواحد',
@@ -330,7 +330,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'machines',
         exercise_id: 'ex_leg_curl',
-        name_ar: 'مرجحة فخذ خلفي بالجهاز (Leg Curl)',
+        name_ar: 'ثني فخذ خلفي بالجهاز',
         name_en: 'Lying Leg Curl',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -338,7 +338,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'bodyweight',
         exercise_id: 'ex_nordic_curl',
-        name_ar: 'نورديك كيرل / جسر الفخذ الخلفي',
+        name_ar: 'جسر الفخذ الخلفي الأرضي',
         name_en: 'Hamstring Glute Bridge',
         inputType: 'bodyweight_reps',
         unitLabel: 'تكرارات',
@@ -347,17 +347,17 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
   },
   {
     id: 'glutes',
-    name_ar: 'المؤخرة والأرداف',
+    name_ar: 'الأرداف وعضلات الحوض',
     name_en: 'Glutes',
     category: 'lower',
     description: 'عضلات الألوية الكبرى والوسطى للثبات والقوة',
-    defaultLiftName: 'دفع الحوض بالبار (Hip Thrust)',
+    defaultLiftName: 'دفع الحوض بالبار',
     defaultLiftNameEn: 'Hip Thrust / Squat',
     equipmentLifts: [
       {
         equipment: 'barbell',
         exercise_id: 'ex_hip_thrust',
-        name_ar: 'دفع الحوض بالبار (Barbell Hip Thrust)',
+        name_ar: 'دفع الحوض بالبار',
         name_en: 'Barbell Hip Thrust',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -365,7 +365,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'dumbbells',
         exercise_id: 'ex_db_hip_thrust',
-        name_ar: 'دفع الحوض بالدامبل أو البولغاريان',
+        name_ar: 'دفع الحوض بالدامبل أو الطعن البلغاري',
         name_en: 'Bulgarian Split Squat / DB Thrust',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -373,7 +373,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'bodyweight',
         exercise_id: 'ex_single_leg_bridge',
-        name_ar: 'جسر الحوض الفردي (Single Leg Bridge)',
+        name_ar: 'جسر الحوض الفردي',
         name_en: 'Single Leg Glute Bridge',
         inputType: 'bodyweight_reps',
         unitLabel: 'تكرار لكل رجل',
@@ -385,14 +385,14 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
     name_ar: 'السمانة',
     name_en: 'Calves',
     category: 'lower',
-    description: 'عضلات الساق الخلفية (الجاستروكنيميوس والسوليوس)',
-    defaultLiftName: 'رفع السمانة واقفاً (Calf Raise)',
+    description: 'عضلات الساق الخلفية والتحمل',
+    defaultLiftName: 'رفع السمانة واقفاً',
     defaultLiftNameEn: 'Standing Calf Raise',
     equipmentLifts: [
       {
         equipment: 'machines',
         exercise_id: 'ex_standing_calf',
-        name_ar: 'رفع السمانة واقفاً بالجهاز أو سميث',
+        name_ar: 'رفع السمانة واقفاً بالجهاز',
         name_en: 'Standing Calf Raise Machine',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -417,7 +417,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
   },
   {
     id: 'abs',
-    name_ar: 'البطن والكور',
+    name_ar: 'البطن والجذع',
     name_en: 'Abs & Core',
     category: 'core',
     description: 'عضلات البطن المستقيمة والمائلة والحزام القطني',
@@ -427,7 +427,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'pullup_bar',
         exercise_id: 'ex_hanging_leg_raise',
-        name_ar: 'رفع الأرجل معلقاً بالعقلة (Hanging Leg Raise)',
+        name_ar: 'رفع الأرجل معلقاً بالعقلة',
         name_en: 'Hanging Leg Raise',
         inputType: 'bodyweight_reps',
         unitLabel: 'تكرار نظيف',
@@ -435,7 +435,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'cable',
         exercise_id: 'ex_cable_crunch',
-        name_ar: 'طحن البطن راكعاً بالكيبل (Cable Crunch)',
+        name_ar: 'طحن البطن راكعاً بالكيبل',
         name_en: 'Cable Crunch',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -443,7 +443,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'bodyweight',
         exercise_id: 'ex_plank',
-        name_ar: 'تمرين الثبات (بلانك بالثواني)',
+        name_ar: 'تمرين الثبات بلانك بالثواني',
         name_en: 'Plank Hold',
         inputType: 'time_seconds',
         unitLabel: 'ثواني ثبات مستمر',
@@ -456,13 +456,13 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
     name_en: 'Forearms',
     category: 'upper',
     description: 'عضلات القبضة والتحمل وثني وبسط المعصم',
-    defaultLiftName: 'التعلق الحر بالعقلة (Dead Hang)',
+    defaultLiftName: 'التعلق الحر بالعقلة',
     defaultLiftNameEn: 'Dead Hang / Wrist Curls',
     equipmentLifts: [
       {
         equipment: 'pullup_bar',
         exercise_id: 'ex_dead_hang',
-        name_ar: 'التعلق الحر بالعقلة (Dead Hang)',
+        name_ar: 'التعلق الحر بالعقلة للقبضة',
         name_en: 'Dead Hang (Grip)',
         inputType: 'time_seconds',
         unitLabel: 'ثواني ثبات',
@@ -470,7 +470,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'dumbbells',
         exercise_id: 'ex_farmers_walk',
-        name_ar: 'مشية المزارع بالدامبلز (Farmer’s Walk)',
+        name_ar: 'مشية المزارع بالدامبلز',
         name_en: 'Farmer’s Walk',
         inputType: 'weight_reps',
         unitLabel: 'كغ لكل يد',
@@ -478,7 +478,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
       {
         equipment: 'barbell',
         exercise_id: 'ex_wrist_curl',
-        name_ar: 'ثني المعصم بالبار (Wrist Curls)',
+        name_ar: 'ثني المعصم بالبار',
         name_en: 'Barbell Wrist Curl',
         inputType: 'weight_reps',
         unitLabel: 'كغ',
@@ -490,6 +490,7 @@ export const MUSCLE_DEFINITIONS: MuscleDefinition[] = [
 export interface TierConfig {
   tier: MuscleRankTier;
   title_ar: string;
+  title_en: string;
   minScore: number;
   maxScore: number;
   color: string;
@@ -502,117 +503,116 @@ export const TIER_CONFIGS: TierConfig[] = [
   {
     tier: 'UNRANKED',
     title_ar: 'غير مصنف',
+    title_en: 'Unranked',
     minScore: 0,
     maxScore: 0,
-    color: '#94a3b8',
-    badgeBg: '#131C1A',
-    badgeBorder: '#1F3A34',
-    badgeText: '#94a3b8',
+    color: '#64748B',
+    badgeBg: 'rgba(100, 116, 139, 0.15)',
+    badgeBorder: '#475569',
+    badgeText: '#94A3B8',
   },
   {
-    tier: 'D',
-    title_ar: 'مبتدئ (Novice)',
+    tier: 'BRONZE',
+    title_ar: 'برونزي',
+    title_en: 'Bronze',
     minScore: 1,
-    maxScore: 32,
-    color: '#4b7566',
-    badgeBg: 'rgba(36, 75, 63, 0.4)',
-    badgeBorder: '#244B3F',
-    badgeText: '#86efac',
+    maxScore: 35,
+    color: '#CD7F32',
+    badgeBg: 'rgba(205, 127, 50, 0.16)',
+    badgeBorder: 'rgba(205, 127, 50, 0.45)',
+    badgeText: '#E6A36E',
   },
   {
-    tier: 'C',
-    title_ar: 'متدرب (Trained)',
-    minScore: 33,
-    maxScore: 47,
-    color: '#348366',
-    badgeBg: 'rgba(46, 101, 81, 0.4)',
-    badgeBorder: '#2E6551',
-    badgeText: '#86efac',
+    tier: 'SILVER',
+    title_ar: 'فضي',
+    title_en: 'Silver',
+    minScore: 36,
+    maxScore: 55,
+    color: '#CBD5E1',
+    badgeBg: 'rgba(203, 213, 225, 0.16)',
+    badgeBorder: 'rgba(203, 213, 225, 0.45)',
+    badgeText: '#F1F5F9',
   },
   {
-    tier: 'C+',
-    title_ar: 'صاعد (Rising)',
-    minScore: 48,
-    maxScore: 56,
-    color: '#46886D',
-    badgeBg: 'rgba(56, 120, 94, 0.4)',
-    badgeBorder: '#3D785F',
-    badgeText: '#A3E6C5',
+    tier: 'GOLD',
+    title_ar: 'ذهبي',
+    title_en: 'Gold',
+    minScore: 56,
+    maxScore: 72,
+    color: '#F59E0B',
+    badgeBg: 'rgba(245, 158, 11, 0.16)',
+    badgeBorder: 'rgba(245, 158, 11, 0.45)',
+    badgeText: '#FDE68A',
   },
   {
-    tier: 'B-',
-    title_ar: 'متمكن (Skilled)',
-    minScore: 57,
-    maxScore: 66,
-    color: '#539C7C',
-    badgeBg: 'rgba(70, 136, 109, 0.45)',
-    badgeBorder: '#46886D',
-    badgeText: '#C8E6CF',
-  },
-  {
-    tier: 'B',
-    title_ar: 'متقدم (Intermediate)',
-    minScore: 67,
-    maxScore: 76,
-    color: '#6BAF8F',
-    badgeBg: 'rgba(107, 175, 143, 0.25)',
-    badgeBorder: '#6BAF8F',
-    badgeText: '#C8E6CF',
-  },
-  {
-    tier: 'B+',
-    title_ar: 'محترف (Proficient)',
-    minScore: 77,
+    tier: 'PLATINUM',
+    title_ar: 'بلاتيني',
+    title_en: 'Platinum',
+    minScore: 73,
     maxScore: 84,
-    color: '#7EC4A3',
-    badgeBg: 'rgba(107, 175, 143, 0.35)',
-    badgeBorder: '#7EC4A3',
-    badgeText: '#F4F5F3',
+    color: '#38BDF8',
+    badgeBg: 'rgba(56, 189, 248, 0.16)',
+    badgeBorder: 'rgba(56, 189, 248, 0.45)',
+    badgeText: '#BAE6FD',
   },
   {
-    tier: 'A-',
-    title_ar: 'بطل (Advanced)',
+    tier: 'DIAMOND',
+    title_ar: 'ماسي',
+    title_en: 'Diamond',
     minScore: 85,
-    maxScore: 90,
-    color: '#93D9B7',
-    badgeBg: 'rgba(147, 217, 183, 0.3)',
-    badgeBorder: '#93D9B7',
-    badgeText: '#F4F5F3',
+    maxScore: 92,
+    color: '#06B6D4',
+    badgeBg: 'rgba(6, 182, 212, 0.16)',
+    badgeBorder: 'rgba(6, 182, 212, 0.45)',
+    badgeText: '#67E8F9',
   },
   {
-    tier: 'A',
-    title_ar: 'أسطوري (Elite)',
-    minScore: 91,
-    maxScore: 95,
-    color: '#A7F3D0',
-    badgeBg: 'rgba(167, 243, 208, 0.3)',
-    badgeBorder: '#A7F3D0',
-    badgeText: '#070B0A',
+    tier: 'UNREAL',
+    title_ar: 'أسطوري',
+    title_en: 'Unreal',
+    minScore: 93,
+    maxScore: 97,
+    color: '#A855F7',
+    badgeBg: 'rgba(168, 85, 247, 0.18)',
+    badgeBorder: 'rgba(168, 85, 247, 0.45)',
+    badgeText: '#D8B4FE',
   },
   {
-    tier: 'A+',
-    title_ar: 'خارق (Master)',
-    minScore: 96,
-    maxScore: 98,
-    color: '#C8E6CF',
-    badgeBg: '#C8E6CF',
-    badgeBorder: '#C8E6CF',
-    badgeText: '#070B0A',
-  },
-  {
-    tier: 'S',
-    title_ar: 'عزم لا يلين (Legendary)',
-    minScore: 99,
+    tier: 'TOP_50',
+    title_ar: 'أفضل 50',
+    title_en: 'Top 50',
+    minScore: 98,
     maxScore: 100,
-    color: '#F4F5F3',
-    badgeBg: 'linear-gradient(135deg, #6BAF8F, #C8E6CF)',
-    badgeBorder: '#C8E6CF',
-    badgeText: '#070B0A',
+    color: '#E11D48',
+    badgeBg: 'rgba(225, 29, 72, 0.2)',
+    badgeBorder: 'rgba(225, 29, 72, 0.5)',
+    badgeText: '#FDA4AF',
   },
 ];
 
-export function getTierConfig(tier: MuscleRankTier): TierConfig {
-  return TIER_CONFIGS.find((c) => c.tier === tier) || TIER_CONFIGS[0];
+export function getTierConfig(tier: MuscleRankTier | string): TierConfig {
+  // Direct match
+  const found = TIER_CONFIGS.find((c) => c.tier === tier);
+  if (found) return found;
+
+  // Legacy mappings for backward compatibility
+  if (tier === 'D' || tier === 'C') return TIER_CONFIGS[1]; // BRONZE
+  if (tier === 'C+' || tier === 'B-') return TIER_CONFIGS[2]; // SILVER
+  if (tier === 'B' || tier === 'B+') return TIER_CONFIGS[3]; // GOLD
+  if (tier === 'A-' || tier === 'A') return TIER_CONFIGS[4]; // PLATINUM
+  if (tier === 'A+') return TIER_CONFIGS[5]; // DIAMOND
+  if (tier === 'S') return TIER_CONFIGS[6]; // UNREAL
+
+  return TIER_CONFIGS[0]; // UNRANKED
+}
+
+export function getNextTier(tier: MuscleRankTier | string): TierConfig | null {
+  const currentConfig = getTierConfig(tier);
+  const currentIndex = TIER_CONFIGS.findIndex((c) => c.tier === currentConfig.tier);
+  if (currentIndex === -1 || currentIndex === TIER_CONFIGS.length - 1) {
+    return null; // Already max rank
+  }
+  return TIER_CONFIGS[currentIndex + 1];
 }
 
 // Consistent Epley formula for 1RM: Weight * (1 + Reps/30)
@@ -713,7 +713,82 @@ export function calculateScoreAndRank(
     }
   }
 
-  return { score, rank: 'D' };
+  return { score, rank: 'BRONZE' };
+}
+
+export function calculateNextRankRequirements(params: {
+  muscleId: MuscleType;
+  currentE1RM: number;
+  bodyweightKg: number;
+  currentReps?: number;
+}): {
+  currentTier: TierConfig;
+  nextTier: TierConfig | null;
+  progressPct: number;
+  remainingKg: number;
+  required1RM: number;
+} {
+  const { muscleId, currentE1RM, bodyweightKg, currentReps = 8 } = params;
+  const { score, rank } = calculateScoreAndRank(muscleId, currentE1RM, bodyweightKg);
+  const currentTier = getTierConfig(rank);
+  const nextTier = getNextTier(rank);
+
+  if (!nextTier) {
+    return {
+      currentTier,
+      nextTier: null,
+      progressPct: 100,
+      remainingKg: 0,
+      required1RM: currentE1RM,
+    };
+  }
+
+  const standards = STRENGTH_RATIOS[muscleId] || STRENGTH_RATIOS.chest;
+  const targetScore = nextTier.minScore;
+  let target1RM = currentE1RM;
+
+  if (muscleId === 'abs' || muscleId === 'forearms') {
+    if (targetScore <= 35) {
+      target1RM = Math.round((targetScore / 35) * standards.novice);
+    } else if (targetScore <= 72) {
+      target1RM = Math.round(standards.novice + ((targetScore - 36) / 36) * (standards.intermediate - standards.novice));
+    } else if (targetScore <= 92) {
+      target1RM = Math.round(standards.intermediate + ((targetScore - 73) / 19) * (standards.advanced - standards.intermediate));
+    } else {
+      target1RM = Math.round(standards.advanced + ((targetScore - 93) / 7) * (standards.elite - standards.advanced));
+    }
+  } else {
+    const bw = Math.max(45, bodyweightKg);
+    let targetRatio = 1.0;
+    if (targetScore <= 35) {
+      targetRatio = (targetScore / 35) * standards.novice;
+    } else if (targetScore <= 72) {
+      targetRatio = standards.novice + ((targetScore - 36) / 36) * (standards.intermediate - standards.novice);
+    } else if (targetScore <= 92) {
+      targetRatio = standards.intermediate + ((targetScore - 73) / 19) * (standards.advanced - standards.intermediate);
+    } else {
+      targetRatio = standards.advanced + ((targetScore - 93) / 7) * (standards.elite - standards.advanced);
+    }
+    target1RM = Math.round(targetRatio * bw);
+  }
+
+  const remaining1RM = Math.max(1, target1RM - currentE1RM);
+  const remainingWeightAtReps = Math.max(1, Math.round(remaining1RM / (1 + currentReps / 30)));
+
+  const currentTierMin = currentTier.minScore;
+  const nextTierMin = nextTier.minScore;
+  const progressPct = Math.min(
+    99,
+    Math.max(8, Math.round(((score - currentTierMin) / Math.max(1, nextTierMin - currentTierMin)) * 100))
+  );
+
+  return {
+    currentTier,
+    nextTier,
+    progressPct,
+    remainingKg: remainingWeightAtReps,
+    required1RM: target1RM,
+  };
 }
 
 // Compute all 11 muscles based on actual user best_lifts
@@ -756,13 +831,13 @@ export function computeMuscleRanksFromLifts(
       );
     }
 
-    // Tier progress %
-    const tierConfig = getTierConfig(rank);
-    let progressToNext = 100;
-    if (tierConfig.tier !== 'S' && tierConfig.tier !== 'UNRANKED') {
-      const range = tierConfig.maxScore - tierConfig.minScore + 1;
-      progressToNext = Math.min(100, Math.round(((score - tierConfig.minScore) / range) * 100));
-    }
+    // Tier progress % towards next tier
+    const req = calculateNextRankRequirements({
+      muscleId: def.id,
+      currentE1RM: lift.estimated_1rm,
+      bodyweightKg: userProfile.weight_kg || 75,
+      currentReps: lift.reps || 8,
+    });
 
     return {
       muscle_id: def.id,
@@ -772,7 +847,7 @@ export function computeMuscleRanksFromLifts(
       score,
       rank,
       previous_rank: lift.rank,
-      progress_percentage: progressToNext,
+      progress_percentage: req.progressPct,
       monthly_improvement_pct: Math.max(0, progressPct),
       best_lift: lift,
       is_unranked: false,
